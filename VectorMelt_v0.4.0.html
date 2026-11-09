@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
+<title>VectorMelt v0.4.0</title>
+<!--
+  VectorMelt (formerly Vector SDF)
+  Blend black and white images and primitive shapes as signed distance fields
+  (metaball style smooth union / subtract / intersect), preview in real time and
+  export the result as clean SVG paths.
+
+  CHANGELOG
+  0.4.0  Text layers: type text with Google Fonts or installed fonts (filter All / Google /
+         Installed, search, any other font by name, Find installed fonts), weight, italic, align,
+         letter spacing, line height, detail. Text goes through the same SDF pipeline as images.
+         About dialog. Versioned file name + index.html redirect for GitHub Pages.
+         Image / text SDF: Catmull-Rom sampling and sub-pixel edges from anti-aliasing (smoother
+         gradients and fillets). Arc fillet: gradient step tied to the fillet radius, fades to a
+         plain union on nearly collinear edges.
+  0.3.1  Fix: tight fillets were taken for sharp corners and the corner fix pushed nodes off the
+         curve (spikes). Corners are kept only when the recovered point sits on the contour.
+         Fix: arc fillet jumped between nearly parallel / facing surfaces (seams, stray bridges).
+         Tolerance, Corner angle, Min area and Resolution moved to a new Curves panel.
+         Live overlay uses a higher resolution when idle.
+  0.3.0  Profile 1 is now a true circular arc tangent to both edges at any angle (rolling ball
+         fillet solved in the oblique frame of the two field gradients). Before, non 90 degree
+         corners turned into stretched ellipses. Profile > 0 now evaluates field gradients.
+  0.2.1  "Ref" button in the Add panel to load the background reference image.
+  0.2.0  Per layer blend controls: Blend style (Round / Chamfer), Profile (soft SDF blend to
+         circular fillet with constant radius), Contact only (gradient based, no bridging or
+         bulging between shapes that only get close). Show handles in the vector overlay,
+         corner nodes in orange.
+  0.1.2  Renamed to VectorMelt, new metaball chain logo (favicon + header).
+         Projects are now .vmelt (old .vsdf files still open). index.html for GitHub Pages.
+  0.1.1  Default look is now a light shape on a dark background (better over references).
+         New Export > SVG color (default black), independent from the preview colors.
+  0.1.0  First version.
+         - Image layers: Otsu or manual threshold, auto invert, real signed EDT + smoothing,
+           or "Blur + Level" pseudo field mode.
+         - Shape layers: circle, ellipse, rounded box, capsule, star/polygon, ring.
+         - Per layer: Union / Subtract / Intersect with its own blend radius, grow/shrink,
+           move / scale / rotate gizmo on canvas.
+         - Reference image in the background with opacity, lock and transform.
+         - Preview modes Fill / Outline / Field, live Bezier vector overlay.
+         - SVG export (marching squares, corner split, Schneider Bezier fit, even-odd),
+           optional offset rings, PNG export, .vsdf project save/load, undo/redo.
+-->
+<style>
+:root{
+  --bg:#17181b; --panel:#1f2125; --panel2:#26292e; --line:#33363c; --text:#d7d9dd; --dim:#8b9099;
+  --accent:#4fb3ff; --accent2:#ff9a3d; --danger:#ff5d5d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:12px/1.35 system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden}
+header{height:40px;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font-weight:500;font-size:15px;letter-spacing:.2px;margin-right:8px;display:flex;align-items:center;gap:6px}
+.brand b{color:var(--accent);font-weight:700}
+.brand .mark{width:22px;height:22px;fill:var(--accent)}
+.ver{font-weight:600;font-size:10px;color:#111;background:var(--accent);padding:2px 6px;border-radius:9px;margin-left:4px;vertical-align:middle}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.spacer{flex:1}
+#status{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45vw}
+button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:4px 9px;font:inherit;cursor:pointer}
+button:hover{border-color:#4a4e56;background:#2d3036}
+button.accent{background:#1d4f74;border-color:#2b6a98}
+button.accent:hover{background:#245e8a}
+button.on{background:#1d4f74;border-color:#2b6a98}
+button:disabled{opacity:.4;cursor:default}
+input[type=text],input[type=number],select{background:#15161a;color:var(--text);border:1px solid var(--line);border-radius:4px;padding:3px 5px;font:inherit}
+input[type=number]{width:62px}
+textarea{background:#15161a;color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 6px;font:inherit;resize:vertical;min-height:38px}
+.fontlist{width:100%;background:#15161a;color:var(--text);border:1px solid var(--line);border-radius:4px;font-size:13px}
+.fontlist option{padding:2px 4px}
+input[type=color]{width:34px;height:22px;padding:0;border:1px solid var(--line);background:none;border-radius:4px}
+#projName{width:150px}
+main{position:absolute;top:40px;bottom:0;left:0;right:0;display:flex}
+aside{width:250px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow-y:auto}
+aside#right{width:290px;border-right:none;border-left:1px solid var(--line)}
+section{padding:8px 10px;border-bottom:1px solid var(--line)}
+section.grow{flex:1;min-height:150px;display:flex;flex-direction:column}
+h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+h3 small{text-transform:none;letter-spacing:0;font-weight:400}
+.addgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.addgrid button{padding:5px 2px}
+#layerList{flex:1;overflow-y:auto;border:1px solid var(--line);border-radius:5px;background:#18191d;min-height:80px}
+.lrow{display:flex;align-items:center;gap:6px;padding:5px 6px;border-bottom:1px solid #24262b;cursor:pointer;user-select:none}
+.lrow:hover{background:#22252a}
+.lrow.sel{background:#1d3a52}
+.lrow .eye{width:18px;text-align:center;color:var(--dim)}
+.lrow .eye.off{opacity:.35}
+.lrow .op{font-size:10px;font-weight:700;width:18px;height:16px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;color:#111}
+.op-union{background:#6fd08c}.op-subtract{background:#ff7a7a}.op-intersect{background:#f2c94c}
+.lrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .ty{color:var(--dim);font-size:10px}
+.rowbtns{display:flex;gap:4px;margin-top:6px}
+.rowbtns button{flex:1;padding:4px 0}
+.row{display:flex;align-items:center;gap:6px;margin:4px 0}
+.row label{width:92px;color:var(--dim);flex-shrink:0}
+.row input[type=range]{flex:1;min-width:40px;accent-color:var(--accent)}
+.row .grow{flex:1;min-width:0;width:100%}
+.seg{display:flex;gap:0;flex:1}
+.seg button{flex:1;border-radius:0;padding:4px 0}
+.seg button:first-child{border-radius:5px 0 0 5px}
+.seg button:last-child{border-radius:0 5px 5px 0}
+.note{color:var(--dim);font-size:11px;margin:4px 0}
+#viewport{flex:1;position:relative;overflow:hidden;background:#101114}
+#viewport canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#hint{position:absolute;left:10px;bottom:8px;color:#7b808a;font-size:11px;pointer-events:none;text-shadow:0 1px 2px #000}
+#dropMsg{position:absolute;inset:12px;border:2px dashed var(--accent);border-radius:10px;display:none;align-items:center;justify-content:center;font-size:16px;color:var(--accent);background:rgba(16,30,45,.55);pointer-events:none}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal[hidden]{display:none}
+.modalBox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 22px;width:min(460px,92vw);font-size:13px}
+.modalBox h2{margin:0 0 8px;font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px}
+.modalBox a{color:var(--accent)}
+.modalBox .dim{color:var(--dim)}
+.keys{border-collapse:collapse;margin:8px 0;width:100%}
+.keys td{padding:3px 4px;color:var(--dim)}
+.keys td:last-child{color:var(--text)}
+kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;font:11px/1.6 ui-monospace,Consolas,monospace;color:var(--text)}
+#refDrop{border:1px dashed #4a4e56;border-radius:6px;padding:8px;text-align:center;color:var(--dim);margin-bottom:6px;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px}
+#refDrop.hot{border-color:var(--accent);color:var(--accent)}
+#refDrop img{max-width:60px;max-height:40px;border-radius:3px}
+.empty{color:var(--dim);padding:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><svg class="mark" viewBox="28.15 41.17 454.67 454.67" aria-hidden="true"><path d="M427.13 132.12C415.79 132.83 405.92 139.41 399.65 148.63C396.61 153.11 394.87 158.63 393.73 163.88C392.35 170.24 392.16 177.2 394.43 183.38C398.6 194.74 411.54 200.89 422.63 203.23C426.04 203.95 429.65 204.23 433.13 203.87C453.16 201.78 467.72 184.61 465.82 164.38C465.43 160.18 464.21 156.04 462.38 152.25C460.37 148.09 457.52 144.4 454.13 141.28C450.75 138.18 446.68 135.76 442.38 134.2C437.45 132.42 432.34 131.79 427.13 132.12ZM314.13 164.12C293.9 165.38 275.87 176.65 265.06 193.63C260.16 201.32 255.78 209.33 251.07 217.13C248.66 221.11 244.93 225.07 240.13 225.75C235.54 226.4 230.93 224.47 226.84 222.63C218.35 218.79 210.45 213.61 202.38 208.99C186.79 200.09 169.52 195.57 151.63 195.01C143.34 194.75 134.95 195.79 126.88 197.58C80.32 207.9 46.52 249.34 45.04 296.88C44.41 317.15 49.93 336.87 60.13 354.3C62.62 358.56 65.61 362.46 68.63 366.36C74.22 373.6 81.38 380.15 88.88 385.37C103.94 395.85 121.27 402.77 139.63 404.49C172.76 407.6 203.31 395.73 226.38 372.05C231.52 366.76 236.15 360.66 239.88 354.3C244.39 346.59 248.18 338.48 250.66 329.88C252.94 321.98 254.36 313.87 256.22 305.88C257.5 300.4 258.74 294.7 261.25 289.63C262.33 287.45 263.79 284.71 265.92 283.38C266.96 282.72 267.94 282.04 269.13 281.65C274.09 279.99 279.92 281.26 284.88 282.41C292.93 284.29 300.98 285.94 309.13 287.37C313.07 288.06 317.14 288.04 321.13 287.91C340.55 287.31 359.17 276.25 369.77 260.13C377.94 247.69 380.74 233.1 380.18 218.38C379.89 211.01 379.17 203.31 375.79 196.63C372.19 189.52 366.22 184.49 360.11 179.63C347.08 169.26 330.88 163.07 314.13 164.12Z"/></svg><span>Vector<b>Melt</b></span><span class="ver" id="ver"></span></div>
+  <input type="text" id="projName" value="vectormelt" title="Project name (used for export file names)">
+  <button id="bNew">New</button>
+  <button id="bOpen">Open</button>
+  <button id="bSave">Save</button>
+  <span class="sep"></span>
+  <button id="bUndo" title="Ctrl+Z">Undo</button>
+  <button id="bRedo" title="Ctrl+Shift+Z / Ctrl+Y">Redo</button>
+  <span class="sep"></span>
+  <button id="bSvg" class="accent">Export SVG</button>
+  <button id="bPng">Export PNG</button>
+  <div class="spacer"></div>
+  <span id="status"></span>
+  <button id="bAbout">About</button>
+</header>
+<main>
+  <aside id="left">
+    <section>
+      <h3>Add</h3>
+      <div class="addgrid">
+        <button data-add="image" title="Black and white image (or drop files on the canvas)">Image</button>
+        <button data-add="circle">Circle</button>
+        <button data-add="ellipse">Ellipse</button>
+        <button data-add="box">Box</button>
+        <button data-add="capsule">Capsule</button>
+        <button data-add="star">Star</button>
+        <button data-add="ring">Ring</button>
+ <button data-add="text" title="Text layer (local or Google fonts)">Text</button>
+        <button data-add="reference" title="Background reference image (never part of the shape)">Ref</button>
+      </div>
+    </section>
+    <section class="grow">
+      <h3>Layers <small>applied bottom to top</small></h3>
+      <div id="layerList"></div>
+      <div class="rowbtns">
+        <button id="bUp" title="Move up">Up</button>
+        <button id="bDown" title="Move down">Down</button>
+        <button id="bDup" title="Ctrl+D">Dup</button>
+        <button id="bDel" title="Delete">Del</button>
+      </div>
+    </section>
+    <section id="refPanel">
+      <h3>Reference <small>background only</small></h3>
+      <div id="refDrop">Drop an image here</div>
+      <div id="refCtl"></div>
+    </section>
+  </aside>
+  <div id="viewport">
+    <canvas id="gl"></canvas>
+    <canvas id="ov"></canvas>
+    <div id="hint">Drag: move | Corners: scale | Top dot: rotate (Shift snaps) | Wheel: zoom | Middle or Space drag: pan | F: fit | 1/2/3: preview mode | V: vector overlay</div>
+    <div id="dropMsg">Drop images to add layers (.vmelt to open a project)</div>
+  </div>
+  <aside id="right">
+    <section><h3>Layer</h3><div id="props"></div></section>
+    <section><h3>Preview</h3><div id="previewCtl"></div></section>
+    <section><h3>Curves <small>overlay and export</small></h3><div id="curveCtl"></div></section>
+    <section><h3>Document</h3><div id="docCtl"></div></section>
+    <section><h3>Export</h3><div id="exportCtl"></div></section>
+  </aside>
+</main>
+<div id="about" class="modal" hidden>
+  <div class="modalBox">
+    <h2>VectorMelt <span class="ver" id="aboutVer"></span></h2>
+    <p>Melt black and white images, text and simple shapes together like metaballs, then export clean SVG.</p>
+    <p><b>Marcelo Souza / Kumodot.art - 2026 // @Msouza3d</b></p>
+    <p><a href="https://ko-fi.com/msouza3d" target="_blank" rel="noopener">Support Marcelo Souza on Ko-fi</a></p>
+    <table class="keys">
+      <tr><td><kbd>Wheel</kbd></td><td>Zoom at cursor</td></tr>
+      <tr><td><kbd>Middle drag</kbd> / <kbd>Space</kbd> + drag</td><td>Pan</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Fit document</td></tr>
+      <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Fill / Outline / Field preview</td></tr>
+      <tr><td><kbd>V</kbd></td><td>Vector overlay</td></tr>
+      <tr><td><kbd>Arrows</kbd> (<kbd>Shift</kbd> x10)</td><td>Nudge layer</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd> / <kbd>Del</kbd></td><td>Duplicate / delete layer</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Undo / redo</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save project</td></tr>
+    </table>
+    <p class="dim">License: MIT · <a href="https://github.com/kumodot/VectorMelt" target="_blank" rel="noopener">GitHub</a></p>
+    <div style="text-align:right"><button id="aboutClose">Close</button></div>
+  </div>
+</div>
+<input type="file" id="fileImg" accept="image/*" multiple hidden>
+<input type="file" id="fileRef" accept="image/*" hidden>
+<input type="file" id="fileProj" accept=".vmelt,.vsdf,.json,application/json" hidden>
+
+<script>
+'use strict';
+const APP_VERSION = '0.4.0';
+const APP_NAME = 'VectorMelt';
+const LEGACY_APP_NAMES = ['VectorSDF'];
+document.getElementById('ver').textContent = 'v' + APP_VERSION;
+console.log(`${APP_NAME} v${APP_VERSION}`);
+
+/* ============================================================================
+   State
+   ========================================================================== */
+const state = {
+  doc: { w: 1024, h: 1024, iso: 0, bg: '#141518', fg: '#f2f0ea' },
+  preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false },
+  export: { quality: 2, tol: 0.35, corner: 45, minArea: 4, rings: 0, ringStep: 12, ringStroke: 1, includeBg: false, pngTransparent: true, svgColor: '#000000' },
+  ref: { asset: null, opacity: 0.5, visible: true, locked: true, x: 512, y: 512, scale: 1 },
+  layers: [],
+  selected: null,
+};
+const assets = new Map();   // key -> {name, dataURL, img, w, h, hasAlpha, autoInvert}
+const imgCache = new Map(); // layer id -> {key, W, H, sc, data, tex}
+let idCounter = 1;
+const uid = () => 'L' + (Date.now().toString(36)) + (idCounter++);
+
+const TYPE_LABEL = { image: 'Image', text: 'Text', circle: 'Circle', ellipse: 'Ellipse', box: 'Box', capsule: 'Capsule', star: 'Star', ring: 'Ring' };
+const SHAPE_PARAMS = {
+  circle:  [['r', 'Radius', 1, 1000, 1]],
+  ellipse: [['rx', 'Radius X', 1, 1000, 1], ['ry', 'Radius Y', 1, 1000, 1]],
+  box:     [['w', 'Width', 1, 2000, 1], ['h', 'Height', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
+  capsule: [['len', 'Length', 0, 2000, 1], ['r', 'Radius', 1, 500, 1]],
+  star:    [['n', 'Points', 3, 24, 1], ['r', 'Radius', 1, 1000, 1], ['sharp', 'Sharpness', 0, 1, 0.01]],
+  ring:    [['r', 'Radius', 1, 1000, 1], ['t', 'Thickness', 1, 500, 1]],
+};
+
+const $ = (id) => document.getElementById(id);
+const statusEl = $('status');
+function setStatus(msg) { statusEl.textContent = msg; }
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* ============================================================================
+   WebGL setup
+   ========================================================================== */
+const glCanvas = $('gl'), ovCanvas = $('ov'), viewportEl = $('viewport');
+const gl = glCanvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: false });
+if (!gl) { document.body.innerHTML = '<div class="empty" style="padding:40px">WebGL2 is required.</div>'; throw new Error('No WebGL2'); }
+const ov = ovCanvas.getContext('2d');
+const MAX_UNITS = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+const MAX_TEX = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+const VS = `#version 300 es
+void main(){ vec2 p = vec2((gl_VertexID<<1)&2, gl_VertexID&2); gl_Position = vec4(p*2.0-1.0, 0.0, 1.0); }`;
+
+const GLSL_LIB = `
+// B = (style 0 round / 1 chamfer, profile 0 soft..1 circular fillet, contact only 0..1, unused)
+float blendU(float a, float b, float k, vec4 B){
+  if(k <= 0.0) return min(a, b);
+  float r = k*0.6;
+  if(B.x > 0.5) return min(min(a, b), (a - r + b)*0.70710678);
+  float h = max(k - abs(a - b), 0.0)/k;
+  float poly = min(a, b) - h*h*k*0.25;
+  if(B.y <= 0.0) return poly;
+  vec2 u = max(vec2(r - a, r - b), 0.0);
+  float rnd = max(r, min(a, b)) - length(u);
+  return mix(poly, rnd, B.y);
+}
+float contactK(vec3 a, vec3 b, float k, float c){
+  if(c <= 0.0 || k <= 0.0) return k;
+  vec2 ga = vec2(a.y - a.x, a.z - a.x), gb = vec2(b.y - b.x, b.z - b.x);
+  float la = length(ga), lb = length(gb);
+  if(la < 1e-6 || lb < 1e-6) return k;
+  float t = smoothstep(-0.9, -0.1, dot(ga, gb)/(la*lb));
+  return k*(1.0 - c + c*t);
+}
+// True circular fillet (rolling ball of radius r) between two surfaces meeting at ANY angle.
+// a, b are distances; c = cos of the angle between their (unit) gradients.
+// The fillet center sits at a = r, b = r. The offset v from that center is solved in the
+// oblique (a, b) frame, so the arc stays circular instead of turning into an ellipse.
+// c is clamped away from +-1: for (nearly) parallel or facing surfaces the exact center runs off
+// to infinity and the field would jump. Clamping c (and using it everywhere) keeps the field
+// continuous; those cases behave like a very narrow wedge.
+float arcCore(float a, float b, float r, float c0){
+  float c = clamp(c0, -0.97, 0.97);
+  float s2 = 1.0 - c*c;
+  float x = r - a, y = r - b;
+  float m = min(a, b);
+  if(x - c*y < 0.0 || y - c*x < 0.0) return m;   // outside the arc's sector: plain union
+  float arc = r - sqrt(max((x*x + y*y - 2.0*c*x*y)/s2, 0.0));
+  // Nearly collinear edges (c -> 1): the true fillet shrinks to nothing and the formula gets
+  // ill-conditioned (wobbles on curved input), so fade to the plain union there.
+  return mix(arc, m, smoothstep(0.7, 0.95, c0));
+}
+float polyU(float a, float b, float k){ float h = max(k - abs(a - b), 0.0)/k; return min(a, b) - h*h*k*0.25; }
+vec3 blend3(vec3 a, vec3 b, float k, vec4 B){
+  float ke = contactK(a, b, k, B.z);
+  if(ke <= 0.0) return min(a, b);
+  float r = ke*0.6;
+  if(B.x > 0.5) return min(min(a, b), (a - r + b)*0.70710678);
+  vec3 soft = vec3(polyU(a.x, b.x, ke), polyU(a.y, b.y, ke), polyU(a.z, b.z, ke));
+  if(B.y <= 0.0) return soft;
+  vec2 ga = vec2(a.y - a.x, a.z - a.x), gb = vec2(b.y - b.x, b.z - b.x);
+  float la = length(ga), lb = length(gb);
+  float c = (la > 1e-6 && lb > 1e-6) ? clamp(dot(ga, gb)/(la*lb), -1.0, 1.0) : 0.0;
+  vec3 arc = vec3(arcCore(a.x, b.x, r, c), arcCore(a.y, b.y, r, c), arcCore(a.z, b.z, r, c));
+  return mix(soft, arc, B.y);
+}
+float sdCircle(vec2 p, float r){ return length(p) - r; }
+float sdEllipse(vec2 p, vec2 r){
+  r = max(r, vec2(1e-3));
+  float k0 = length(p/r); float k1 = length(p/(r*r));
+  return k1 > 1e-8 ? k0*(k0-1.0)/k1 : -min(r.x, r.y);
+}
+float sdBox(vec2 p, vec2 b, float rr){ rr = min(rr, min(b.x, b.y)); vec2 q = abs(p) - b + rr; return length(max(q,0.0)) + min(max(q.x,q.y),0.0) - rr; }
+float sdCapsule(vec2 p, float h, float r){ p.x = abs(p.x); p.x -= clamp(p.x, 0.0, h); return length(p) - r; }
+float sdStar(vec2 p, float r, float n, float m){
+  float an = 3.14159265/n; float en = 3.14159265/m;
+  vec2 acs = vec2(cos(an), sin(an)); vec2 ecs = vec2(cos(en), sin(en));
+  float bn = mod(atan(p.x, -p.y), 2.0*an) - an;
+  p = length(p)*vec2(cos(bn), abs(sin(bn)));
+  p -= r*acs;
+  p += ecs*clamp(-dot(p, ecs), 0.0, r*acs.y/ecs.y);
+  return length(p)*sign(p.x);
+}
+float sdRing(vec2 p, float r, float t){ return abs(length(p) - r) - t*0.5; }
+// Catmull-Rom (C1) sampling: smooth gradients matter for the arc fillet, bilinear made them
+// piecewise constant per texel and the fillets came out jagged on image / text layers.
+float crw(float p0, float p1, float p2, float p3, float t){
+  return p1 + 0.5*t*(p2 - p0 + t*(2.0*p0 - 5.0*p1 + 4.0*p2 - p3 + t*(3.0*(p1 - p2) + p3 - p0)));
+}
+float sampleSDF(sampler2D t, vec2 size, vec2 l){
+  vec2 u = l + size*0.5;
+  vec2 c = clamp(u, vec2(0.5), size - 0.5);
+  float ext = length(u - c);
+  vec2 f = c - 0.5; ivec2 i0 = ivec2(floor(f)); vec2 fr = f - vec2(i0);
+  ivec2 mx = ivec2(size) - 1;
+  float r[4];
+  for(int j = 0; j < 4; j++){
+    ivec2 q = i0 + ivec2(-1, j - 1);
+    float v0 = texelFetch(t, clamp(q, ivec2(0), mx), 0).r;
+    float v1 = texelFetch(t, clamp(q + ivec2(1, 0), ivec2(0), mx), 0).r;
+    float v2 = texelFetch(t, clamp(q + ivec2(2, 0), ivec2(0), mx), 0).r;
+    float v3 = texelFetch(t, clamp(q + ivec2(3, 0), ivec2(0), mx), 0).r;
+    r[j] = crw(v0, v1, v2, v3, fr.x);
+  }
+  return crw(r[0], r[1], r[2], r[3], fr.y) + ext;
+}
+`;
+
+function shapeExpr(L, i, texIdx) {
+  const q = `uQ[${i}]`;
+  switch (L.type) {
+    case 'circle': return `sdCircle(l, ${q}.x)`;
+    case 'ellipse': return `sdEllipse(l, ${q}.xy)`;
+    case 'box': return `sdBox(l, ${q}.xy, ${q}.z)`;
+    case 'capsule': return `sdCapsule(l, ${q}.x, ${q}.y)`;
+    case 'star': return `sdStar(l, ${q}.x, ${q}.y, ${q}.z)`;
+    case 'ring': return `sdRing(l, ${q}.x, ${q}.y)`;
+    case 'image': case 'text': return `sampleSDF(uTex${texIdx}, ${q}.xy, l)`;
+  }
+  return '1e5';
+}
+
+function visibleLayers() {
+  const out = []; let tex = 0;
+  for (const L of state.layers) {
+    if (!L.visible) continue;
+    if (isRaster(L)) { if (tex >= MAX_UNITS - 1) continue; out.push({ L, tex: tex++ }); }
+    else out.push({ L, tex: -1 });
+  }
+  return out;
+}
+
+// Layers whose blend needs field gradients (Contact only, or a Round profile above 0)
+function needs3pt(L) { return (L.contact || 0) > 0 || ((L.style || 'round') === 'round' && (L.profile || 0) > 0 && (L.k || 0) > 0); }
+// Finite difference step for field gradients. A step tied to the largest fillet radius gives the
+// arc fillet a tangent "at the scale of the ball", so curved or rounded edges do not make it wobble.
+function gradStep(vis) {
+  let kmax = 0;
+  for (const { L } of vis) if (needs3pt(L)) kmax = Math.max(kmax, L.k || 0);
+  return clamp(kmax * 0.6 * 0.12, 0.35, 8);
+}
+function buildFS(vis) {
+  const n = Math.max(1, vis.length);
+  let decl = `uniform vec4 uT[${n}]; uniform vec4 uP[${n}]; uniform vec4 uQ[${n}]; uniform vec4 uB[${n}];\n`;
+  let fns = '', body = '';
+  const three = vis.some(v => needs3pt(v.L));
+  vis.forEach(({ L, tex }, i) => {
+    if (tex >= 0) decl += `uniform sampler2D uTex${tex};\n`;
+    fns += `float L${i}(vec2 p){ vec2 d = p - uT[${i}].xy; vec2 l = vec2(uT[${i}].z*d.x + uT[${i}].w*d.y, -uT[${i}].w*d.x + uT[${i}].z*d.y)/uP[${i}].x; return (${shapeExpr(L, i, tex)})*uP[${i}].x - uP[${i}].y; }\n`;
+    const args = `uP[${i}].z, uB[${i}]`;
+    if (three) {
+      body += `  e = vec3(L${i}(p), L${i}(p + vec2(E, 0.0)), L${i}(p + vec2(0.0, E)));\n`;
+      body += L.op === 'subtract' ? `  d = -blend3(-d, e, ${args});\n` : L.op === 'intersect' ? `  d = -blend3(-d, -e, ${args});\n` : `  d = blend3(d, e, ${args});\n`;
+    } else {
+      const e = `L${i}(p)`;
+      body += L.op === 'subtract' ? `  d = -blendU(-d, ${e}, ${args});\n` : L.op === 'intersect' ? `  d = -blendU(-d, -${e}, ${args});\n` : `  d = blendU(d, ${e}, ${args});\n`;
+    }
+  });
+  const fieldFn = three
+    ? `float field(vec2 p){\n  float E = uGradE; vec3 d = vec3(1e5); vec3 e;\n${body}  return d.x;\n}`
+    : `float field(vec2 p){\n  float d = 1e5;\n${body}  return d;\n}`;
+  return `#version 300 es
+precision highp float; precision highp int; precision highp sampler2D;
+out vec4 o;
+uniform vec2 uRes; uniform vec3 uView; uniform vec2 uDoc; uniform float uIso; uniform int uMode;
+uniform vec3 uBg; uniform vec3 uFg; uniform float uFillA; uniform float uBand;
+uniform sampler2D uRef; uniform int uRefOn; uniform float uRefA; uniform vec3 uRefT; uniform vec2 uRefSize;
+uniform int uRings; uniform float uRingStep; uniform float uGradE;
+${decl}
+${GLSL_LIB}
+${fns}
+${fieldFn}
+void main(){
+  vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+  vec2 p = (frag - uView.xy)/uView.z;
+  float d = field(p) - uIso;
+  float px = 1.0/uView.z;
+  if(uMode == 10){
+    float v = clamp(d*uView.z/4096.0 + 0.5, 0.0, 1.0);
+    float x = floor(v*65535.0 + 0.5); float hi = floor(x/256.0); float lo = x - hi*256.0;
+    o = vec4(hi/255.0, lo/255.0, 0.0, 1.0); return;
+  }
+  if(uMode == 11 || uMode == 12){
+    float a = clamp(0.5 - d/px, 0.0, 1.0);
+    o = uMode == 11 ? vec4(uFg, a) : vec4(mix(uBg, uFg, a), 1.0); return;
+  }
+  bool inDoc = p.x >= 0.0 && p.y >= 0.0 && p.x <= uDoc.x && p.y <= uDoc.y;
+  vec3 col = inDoc ? uBg : vec3(0.085, 0.09, 0.1);
+  if(uRefOn == 1){
+    vec2 uv = ((p - uRefT.xy)/uRefT.z + uRefSize*0.5)/uRefSize;
+    if(uv.x >= 0.0 && uv.y >= 0.0 && uv.x <= 1.0 && uv.y <= 1.0){
+      vec4 r = texture(uRef, uv);
+      col = mix(col, r.rgb, r.a*uRefA*(inDoc ? 1.0 : 0.3));
+    }
+  }
+  vec3 lineC = vec3(0.31, 0.70, 1.0);
+  if(uMode == 0){
+    float a = clamp(0.5 - d/px, 0.0, 1.0);
+    col = mix(col, uFg, a*uFillA);
+  } else if(uMode == 1){
+    float a = clamp(0.5 - d/px, 0.0, 1.0);
+    col = mix(col, uFg, a*uFillA*0.2);
+    col = mix(col, lineC, clamp(1.25 - abs(d)/px, 0.0, 1.0));
+  } else {
+    vec3 fc = d > 0.0 ? vec3(0.95, 0.60, 0.28) : vec3(0.38, 0.70, 1.0);
+    fc *= 1.0 - exp(-abs(d)*8.0/max(uDoc.x, uDoc.y));
+    fc *= 0.8 + 0.2*cos(6.2831853*d/uBand);
+    fc = mix(fc, vec3(1.0), clamp(1.5 - abs(d)/px, 0.0, 1.0));
+    col = mix(col, fc, uFillA);
+  }
+  for(int i = 1; i <= 64; i++){
+    if(i > uRings) break;
+    float lv = float(i)*uRingStep;
+    col = mix(col, vec3(0.95, 0.45, 0.2), 0.85*clamp(1.0 - abs(d - lv)/px, 0.0, 1.0));
+  }
+  if(!inDoc) col *= 0.8;
+  o = vec4(col, 1.0);
+}`;
+}
+
+function compile(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { const log = gl.getShaderInfoLog(s); console.error(log, src); throw new Error(log); }
+  return s;
+}
+const vsObj = compile(gl.VERTEX_SHADER, VS);
+let prog = null, progKey = '', U = {}, progVis = [];
+const vao = gl.createVertexArray();
+
+function ensureProgram() {
+  const vis = visibleLayers();
+  const key = vis.map(v => v.L.type + ':' + v.L.op + ':' + v.tex).join('|') + (vis.some(v => needs3pt(v.L)) ? '|3pt' : '');
+  progVis = vis;
+  if (prog && key === progKey) return;
+  const fs = compile(gl.FRAGMENT_SHADER, buildFS(vis));
+  const p = gl.createProgram(); gl.attachShader(p, vsObj); gl.attachShader(p, fs); gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  gl.deleteShader(fs);
+  if (prog) gl.deleteProgram(prog);
+  prog = p; progKey = key; U = {};
+  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); const name = info.name.replace(/\[0\]$/, ''); U[name] = gl.getUniformLocation(p, info.name); }
+}
+
+// Dummy textures
+function makeTex(internal, w, h, fmt, type, data, filter) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage2D(gl.TEXTURE_2D, 0, internal, w, h, 0, fmt, type, data);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+const dummySDF = makeTex(gl.R32F, 1, 1, gl.RED, gl.FLOAT, new Float32Array([1e5]), gl.NEAREST);
+const dummyRGBA = makeTex(gl.RGBA8, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]), gl.NEAREST);
+let refTex = null, refTexAsset = null;
+
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
+
+function layerUniforms(L) {
+  const th = (L.rot || 0) * Math.PI / 180;
+  const T = [L.x, L.y, Math.cos(th), Math.sin(th)];
+  let scale = Math.max(1e-4, L.scale), Q = [0, 0, 0, 0];
+  switch (L.type) {
+    case 'circle': Q = [L.r, 0, 0, 0]; break;
+    case 'ellipse': Q = [L.rx, L.ry, 0, 0]; break;
+    case 'box': Q = [L.w / 2, L.h / 2, L.round, 0]; break;
+    case 'capsule': Q = [L.len / 2, L.r, 0, 0]; break;
+    case 'star': { const n = Math.round(L.n); Q = [L.r, n, 2 + (1 - L.sharp) * (n - 2), 0]; break; }
+    case 'ring': Q = [L.r, L.t, 0, 0]; break;
+    case 'image': case 'text': {
+      const c = imgCache.get(L.id);
+      if (c) { Q = [c.W, c.H, 0, 0]; scale = Math.max(1e-4, L.scale / c.sc); } else Q = [1, 1, 0, 0];
+      break;
+    }
+  }
+  const B = [L.style === 'chamfer' ? 1 : 0, clamp(L.profile || 0, 0, 1), clamp(L.contact || 0, 0, 1), 0];
+  return { T, P: [scale, L.grow || 0, Math.max(0, L.k || 0), 0], Q, B };
+}
+
+function setCommonUniforms(resW, resH, view, mode) {
+  ensureProgram();
+  gl.useProgram(prog);
+  gl.bindVertexArray(vao);
+  const d = state.doc, pv = state.preview, ex = state.export;
+  gl.uniform2f(U.uRes, resW, resH);
+  gl.uniform3f(U.uView, view.ox, view.oy, view.s);
+  gl.uniform2f(U.uDoc, d.w, d.h);
+  gl.uniform1f(U.uIso, d.iso);
+  gl.uniform1i(U.uMode, mode);
+  gl.uniform3fv(U.uBg, hexToRgb(d.bg)); gl.uniform3fv(U.uFg, hexToRgb(d.fg));
+  gl.uniform1f(U.uFillA, pv.fillA);
+  gl.uniform1f(U.uBand, Math.max(d.w, d.h) / 48);
+  gl.uniform1i(U.uRings, mode < 10 ? ex.rings : 0);
+  gl.uniform1f(U.uRingStep, ex.ringStep);
+  if (U.uGradE) gl.uniform1f(U.uGradE, gradStep(progVis));
+  // reference
+  const r = state.ref, ra = r.asset && assets.get(r.asset);
+  gl.activeTexture(gl.TEXTURE0);
+  if (ra && r.visible && mode < 10) {
+    if (refTexAsset !== r.asset) {
+      if (refTex) gl.deleteTexture(refTex);
+      refTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, refTex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, ra.img);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      refTexAsset = r.asset;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, refTex);
+    gl.uniform1i(U.uRefOn, 1); gl.uniform1f(U.uRefA, r.opacity);
+    gl.uniform3f(U.uRefT, r.x, r.y, Math.max(1e-4, r.scale)); gl.uniform2f(U.uRefSize, ra.w, ra.h);
+  } else { gl.bindTexture(gl.TEXTURE_2D, dummyRGBA); gl.uniform1i(U.uRefOn, 0); }
+  gl.uniform1i(U.uRef, 0);
+  // layers
+  const n = Math.max(1, progVis.length);
+  const T = new Float32Array(n * 4), P = new Float32Array(n * 4), Q = new Float32Array(n * 4), B = new Float32Array(n * 4);
+  progVis.forEach(({ L, tex }, i) => {
+    const u = layerUniforms(L);
+    T.set(u.T, i * 4); P.set(u.P, i * 4); Q.set(u.Q, i * 4); B.set(u.B, i * 4);
+    if (tex >= 0) {
+      gl.activeTexture(gl.TEXTURE1 + tex);
+      const c = imgCache.get(L.id);
+      gl.bindTexture(gl.TEXTURE_2D, c && c.tex ? c.tex : dummySDF);
+      gl.uniform1i(U['uTex' + tex], 1 + tex);
+    }
+  });
+  if (U.uT) { gl.uniform4fv(U.uT, T); gl.uniform4fv(U.uP, P); gl.uniform4fv(U.uQ, Q); if (U.uB) gl.uniform4fv(U.uB, B); }
+}
+
+/* ============================================================================
+   View and rendering
+   ========================================================================== */
+const view = { ox: 0, oy: 0, s: 1 };
+let dpr = 1, needsRender = true, viewFitted = false;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(viewportEl.clientWidth * dpr)), h = Math.max(1, Math.round(viewportEl.clientHeight * dpr));
+  if (glCanvas.width !== w || glCanvas.height !== h) {
+    glCanvas.width = ovCanvas.width = w; glCanvas.height = ovCanvas.height = h;
+    if (!viewFitted) fitView();
+    requestRender();
+  }
+}
+function fitView() {
+  const w = glCanvas.width, h = glCanvas.height, m = 40 * dpr;
+  view.s = Math.min((w - 2 * m) / state.doc.w, (h - 2 * m) / state.doc.h);
+  view.ox = (w - state.doc.w * view.s) / 2; view.oy = (h - state.doc.h * view.s) / 2;
+  viewFitted = true; requestRender();
+}
+function requestRender() { needsRender = true; }
+
+function renderFrame() {
+  if (!needsRender) return;
+  needsRender = false;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+  try {
+    setCommonUniforms(glCanvas.width, glCanvas.height, view, state.preview.mode);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  } catch (e) { console.error(e); setStatus('Render error: ' + e.message); }
+  drawOverlay();
+}
+function loop() { resize(); renderFrame(); requestAnimationFrame(loop); }
+
+/* Offscreen render, returns RGBA8 pixels (rows bottom to top as WebGL gives them) */
+let fbo = null, fboTex = null, fboW = 0, fboH = 0;
+function renderOffscreen(W, H, v, mode) {
+  if (!fbo) fbo = gl.createFramebuffer();
+  if (W !== fboW || H !== fboH) {
+    if (fboTex) gl.deleteTexture(fboTex);
+    fboTex = makeTex(gl.RGBA8, W, H, gl.RGBA, gl.UNSIGNED_BYTE, null, gl.NEAREST);
+    fboW = W; fboH = H;
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTex, 0);
+  gl.viewport(0, 0, W, H);
+  setCommonUniforms(W, H, v, mode);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  const px = new Uint8Array(W * H * 4);
+  gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  requestRender();
+  return px;
+}
+
+/* Field on a grid: value in grid px, grid[j*W+i] samples doc point ((i+0.5)/q, (j+0.5)/q) */
+function renderField(q) {
+  const d = state.doc;
+  const lim = Math.min(MAX_TEX, 8192);
+  q = Math.min(q, lim / d.w, lim / d.h);
+  const W = Math.max(2, Math.round(d.w * q)), H = Math.max(2, Math.round(d.h * q));
+  const px = renderOffscreen(W, H, { ox: 0, oy: 0, s: q }, 10);
+  const g = new Float32Array(W * H);
+  for (let row = 0; row < H; row++) {
+    const j = H - 1 - row;
+    for (let i = 0; i < W; i++) {
+      const o = (row * W + i) * 4;
+      g[j * W + i] = ((px[o] * 256 + px[o + 1]) / 65535 - 0.5) * 4096;
+    }
+  }
+  return { g, W, H, q };
+}
+
+/* ============================================================================
+   Image layers: threshold + signed EDT, or blur + level
+   ========================================================================== */
+const INF = 1e20;
+function dt1d(f, n, d, v, z) {
+  let k = 0; v[0] = 0; z[0] = -INF; z[1] = INF;
+  for (let q = 1; q < n; q++) {
+    let s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    while (s <= z[k]) { k--; s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+    k++; v[k] = q; z[k] = s; z[k + 1] = INF;
+  }
+  k = 0;
+  for (let q = 0; q < n; q++) { while (z[k + 1] < q) k++; const dq = q - v[k]; d[q] = dq * dq + f[v[k]]; }
+}
+function edt2d(f, W, H) {
+  const n = Math.max(W, H);
+  const col = new Float64Array(n), d = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) col[y] = f[y * W + x];
+    dt1d(col, H, d, v, z);
+    for (let y = 0; y < H; y++) f[y * W + x] = d[y];
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) col[x] = f[y * W + x];
+    dt1d(col, W, d, v, z);
+    for (let x = 0; x < W; x++) f[y * W + x] = d[x];
+  }
+}
+function boxesForGauss(sigma, n) {
+  const wIdeal = Math.sqrt((12 * sigma * sigma / n) + 1);
+  let wl = Math.floor(wIdeal); if (wl % 2 === 0) wl--;
+  const wu = wl + 2;
+  const mIdeal = (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
+  const m = Math.round(mIdeal);
+  const sizes = []; for (let i = 0; i < n; i++) sizes.push(i < m ? wl : wu);
+  return sizes;
+}
+function boxBlur1(src, dst, W, H, r, horiz) {
+  const iarr = 1 / (r + r + 1);
+  const len = horiz ? W : H, lines = horiz ? H : W, stride = horiz ? 1 : W, last = len - 1;
+  for (let l = 0; l < lines; l++) {
+    const base = horiz ? l * W : l;
+    const at = (k) => src[base + (k < 0 ? 0 : k > last ? last : k) * stride];
+    let acc = 0;
+    for (let k = -r; k <= r; k++) acc += at(k);
+    for (let k = 0; k < len; k++) {
+      dst[base + k * stride] = acc * iarr;
+      acc += at(k + r + 1) - at(k - r);
+    }
+  }
+}
+function gaussian(a, W, H, sigma) {
+  if (sigma < 0.3) return a;
+  const tmp = new Float32Array(a.length);
+  for (const b of boxesForGauss(sigma, 3)) {
+    const r = (b - 1) / 2;
+    if (r < 1) continue;
+    boxBlur1(a, tmp, W, H, r, true);
+    boxBlur1(tmp, a, W, H, r, false);
+  }
+  return a;
+}
+function otsu(vals) {
+  const hist = new Float64Array(256);
+  for (const v of vals) hist[clamp(Math.round(v * 255), 0, 255)]++;
+  const total = vals.length; let sum = 0;
+  for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, best = 0, thr = 127;
+  for (let t = 0; t < 256; t++) {
+    wB += hist[t]; if (!wB) continue;
+    const wF = total - wB; if (!wF) break;
+    sumB += t * hist[t];
+    const mB = sumB / wB, mF = (sum - sumB) / wF;
+    const between = wB * wF * (mB - mF) * (mB - mF);
+    if (between > best) { best = between; thr = t; }
+  }
+  return (thr + 0.5) / 255;
+}
+/* ============================================================================
+   Text layers: fonts (Google + installed) and text rendering
+   A text layer is rendered white-on-transparent into a canvas and then goes
+   through the same SDF pipeline as image layers.
+   ========================================================================== */
+const GOOGLE_FONTS = [
+  ['Fredoka', 'Sans'], ['Inter', 'Sans'], ['Roboto', 'Sans'], ['Open Sans', 'Sans'], ['Montserrat', 'Sans'], ['Poppins', 'Sans'],
+  ['Lato', 'Sans'], ['Raleway', 'Sans'], ['Nunito', 'Sans'], ['Rubik', 'Sans'], ['Work Sans', 'Sans'], ['Quicksand', 'Sans'],
+  ['Comfortaa', 'Sans'], ['Varela Round', 'Sans'], ['Josefin Sans', 'Sans'], ['League Spartan', 'Sans'], ['Space Grotesk', 'Sans'],
+  ['Syne', 'Sans'], ['Unbounded', 'Sans'], ['Archivo', 'Sans'], ['Barlow Condensed', 'Sans'], ['IBM Plex Sans', 'Sans'],
+  ['Baloo 2', 'Sans'], ['Oswald', 'Sans'],
+  ['Bebas Neue', 'Display'], ['Anton', 'Display'], ['Archivo Black', 'Display'], ['Alfa Slab One', 'Display'], ['Abril Fatface', 'Display'],
+  ['Bungee', 'Display'], ['Righteous', 'Display'], ['Titan One', 'Display'], ['Lilita One', 'Display'], ['Luckiest Guy', 'Display'],
+  ['Bangers', 'Display'], ['Chewy', 'Display'], ['Bowlby One', 'Display'], ['Rubik Mono One', 'Display'], ['Rubik Bubbles', 'Display'],
+  ['Cherry Bomb One', 'Display'], ['Shrikhand', 'Display'], ['Monoton', 'Display'], ['Audiowide', 'Display'], ['Orbitron', 'Display'],
+  ['Russo One', 'Display'], ['Staatliches', 'Display'], ['Teko', 'Display'], ['Black Ops One', 'Display'], ['Rammetto One', 'Display'],
+  ['Sniglet', 'Display'], ['Grandstander', 'Display'], ['Yeseva One', 'Display'],
+  ['Playfair Display', 'Serif'], ['Merriweather', 'Serif'], ['Lora', 'Serif'], ['DM Serif Display', 'Serif'], ['Cinzel', 'Serif'],
+  ['Cormorant Garamond', 'Serif'], ['EB Garamond', 'Serif'], ['Libre Baskerville', 'Serif'], ['Roboto Slab', 'Serif'], ['Zilla Slab', 'Serif'],
+  ['Source Serif 4', 'Serif'],
+  ['Pacifico', 'Script'], ['Lobster', 'Script'], ['Dancing Script', 'Script'], ['Great Vibes', 'Script'], ['Satisfy', 'Script'],
+  ['Kaushan Script', 'Script'], ['Permanent Marker', 'Script'], ['Caveat', 'Script'], ['Shadows Into Light', 'Script'], ['Amatic SC', 'Script'],
+  ['Press Start 2P', 'Mono'], ['VT323', 'Mono'], ['Silkscreen', 'Mono'], ['Space Mono', 'Mono'], ['JetBrains Mono', 'Mono'], ['IBM Plex Mono', 'Mono'],
+];
+const SYSTEM_FONTS = ['Arial', 'Arial Black', 'Helvetica', 'Helvetica Neue', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Segoe UI', 'Segoe UI Black',
+  'Bahnschrift', 'Calibri', 'Candara', 'Corbel', 'Franklin Gothic Medium', 'Gill Sans', 'Futura', 'Avenir', 'Avenir Next', 'Optima', 'Impact',
+  'Haettenschweiler', 'Times New Roman', 'Georgia', 'Garamond', 'Palatino Linotype', 'Book Antiqua', 'Cambria', 'Didot', 'Baskerville',
+  'Rockwell', 'Cooper Black', 'Courier New', 'Consolas', 'Lucida Console', 'Menlo', 'Monaco', 'Comic Sans MS', 'Brush Script MT',
+  'Segoe Script', 'Segoe Print', 'Ink Free', 'Gabriola', 'Chalkboard', 'Marker Felt', 'Papyrus', 'Copperplate', 'American Typewriter',
+  'DejaVu Sans', 'Liberation Sans', 'Noto Sans'];
+const fontState = new Map();      // google "family|weight|italic" -> 'loading' | 'ready' | 'failed'
+const installedFonts = new Set(); // from queryLocalFonts()
+let detectedLocal = null;
+const fontTestCtx = document.createElement('canvas').getContext('2d');
+let fontFilter = 'all', fontSearch = '';
+
+function fontAvailable(family) {
+  const t = 'mmmmmmmmmmlli WWW 0123 @#';
+  for (const base of ['monospace', 'serif', 'sans-serif']) {
+    fontTestCtx.font = `72px ${base}`; const w0 = fontTestCtx.measureText(t).width;
+    fontTestCtx.font = `72px "${family}", ${base}`;
+    if (fontTestCtx.measureText(t).width !== w0) return true;
+  }
+  return false;
+}
+function localFontList() {
+  if (!detectedLocal) detectedLocal = SYSTEM_FONTS.filter(fontAvailable);
+  return [...new Set([...detectedLocal, ...installedFonts])].sort((a, b) => a.localeCompare(b));
+}
+async function findInstalledFonts() {
+  if (!window.queryLocalFonts) { setStatus('This browser cannot list installed fonts (Chrome or Edge can). Type the font name under "Other font".'); return; }
+  try {
+    const list = await window.queryLocalFonts();
+    for (const f of list) installedFonts.add(f.family);
+    setStatus(`${localFontList().length} installed font families available`);
+    fontFilter = 'local'; buildProps();
+  } catch (e) { setStatus('Font access was not allowed (' + e.message + ')'); }
+}
+const gKey = (fam, w, it) => `${fam}|${w}|${it ? 1 : 0}`;
+function ensureGoogleFont(fam, w, it) {
+  const key = gKey(fam, w, it);
+  if (fontState.has(key)) return;
+  fontState.set(key, 'loading');
+  const famQ = encodeURIComponent(fam).replace(/%20/g, '+');
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${famQ}:ital,wght@${it ? 1 : 0},${w}&display=block`;
+  const finish = (st) => { fontState.set(key, st); refreshTextLayers(fam); };
+  link.onload = () => {
+    document.fonts.load(`${it ? 'italic ' : ''}${w} 64px "${fam}"`)
+      .then(f => finish(f.length ? 'ready' : 'failed')).catch(() => finish('failed'));
+  };
+  link.onerror = () => {
+    // This weight / style does not exist for the family: load the regular face, the browser
+    // synthesizes bold / italic from it.
+    if (w !== 400 || it) { ensureGoogleFont(fam, 400, false); finish('failed'); }
+    else { finish('failed'); setStatus(`Google font "${fam}" not found (check the exact name on fonts.google.com)`); }
+  };
+  document.head.appendChild(link);
+}
+function refreshTextLayers(fam) {
+  let hit = false;
+  for (const L of state.layers) if (L.type === 'text' && L.font === fam) { processImage(L); hit = true; }
+  if (hit) { requestRender(); scheduleVector(); }
+}
+function textFontCSS(L, px) { return `${L.italic ? 'italic ' : ''}${L.weight || 400} ${px}px "${L.font}", sans-serif`; }
+function textKey(L) {
+  const g = L.source === 'google' ? (fontState.get(gKey(L.font, L.weight, L.italic)) || '') + (fontState.get(gKey(L.font, 400, false)) || '') : '';
+  return [L.text, L.font, L.source, L.weight, L.italic, L.spacing, L.lineHeight, L.align, L.detail, g].join('\u0001');
+}
+const textCache = new Map(); // layer id -> {key, src}
+function textSource(L) {
+  const key = textKey(L);
+  const c = textCache.get(L.id);
+  if (c && c.key === key) return c.src;
+  if (L.source === 'google') ensureGoogleFont(L.font, L.weight || 400, !!L.italic);
+  const px = L.detail || 256;
+  const cv = document.createElement('canvas'), x = cv.getContext('2d');
+  const font = textFontCSS(L, px), sp = (L.spacing || 0) * px / 100;
+  const setup = () => { x.font = font; if ('letterSpacing' in x) x.letterSpacing = sp + 'px'; x.fillStyle = '#fff'; x.textBaseline = 'alphabetic'; };
+  setup();
+  const lines = String(L.text ?? '').split('\n');
+  const ms = lines.map(t => x.measureText(t || ' '));
+  const asc = ms[0].fontBoundingBoxAscent || px * 0.95, desc = ms[0].fontBoundingBoxDescent || px * 0.3;
+  const lh = px * (L.lineHeight || 1.1);
+  const widths = ms.map(m => m.width), maxW = Math.max(1, ...widths);
+  const pad = Math.ceil(px * 0.35);
+  const W = Math.min(16384, Math.ceil(maxW + 2 * pad)), H = Math.min(16384, Math.ceil((lines.length - 1) * lh + asc + desc + 2 * pad));
+  cv.width = W; cv.height = H; setup();
+  lines.forEach((t, i) => {
+    let ox = pad;
+    if (L.align === 'center') ox += (maxW - widths[i]) / 2; else if (L.align === 'right') ox += maxW - widths[i];
+    x.fillText(t, ox, pad + asc + i * lh);
+  });
+  // crop to the ink so the gizmo box fits the letters
+  const d = x.getImageData(0, 0, W, H).data;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (d[(yy * W + xx) * 4 + 3] > 8) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+  let src;
+  if (x1 < 0) { const e = document.createElement('canvas'); e.width = e.height = 8; src = { img: e, w: 8, h: 8, hasAlpha: true, autoInvert: false }; }
+  else {
+    const m = 2, cw = x1 - x0 + 1 + 2 * m, ch = y1 - y0 + 1 + 2 * m;
+    const out = document.createElement('canvas'); out.width = cw; out.height = ch;
+    out.getContext('2d').drawImage(cv, x0 - m, y0 - m, cw, ch, 0, 0, cw, ch);
+    src = { img: out, w: cw, h: ch, hasAlpha: true, autoInvert: false };
+  }
+  textCache.set(L.id, { key, src });
+  return src;
+}
+function rasterSource(L) { return L.type === 'text' ? textSource(L) : assets.get(L.asset); }
+function isRaster(L) { return L.type === 'image' || L.type === 'text'; }
+function addTextLayer() {
+  const [x, y] = viewCenterDoc(), d = state.doc, m = Math.min(d.w, d.h);
+  const L = {
+    id: uid(), type: 'text', name: nextName('text'), visible: true, op: 'union', k: Math.round(m * 0.02), style: 'round', profile: 0.6, contact: 0,
+    grow: 0, x, y, scale: 1, rot: 0,
+    text: 'Melt', source: 'google', font: 'Fredoka', weight: 600, italic: false, spacing: 0, lineHeight: 1.1, align: 'center', detail: 512,
+    res: 4096, mode: 'sdf', invert: false, autoThr: false, thr: 0.5, smooth: 1.2, blur: 6, level: 0.5,
+  };
+  const src = textSource(L);
+  L.scale = +Math.min(d.w * 0.6 / src.w, d.h * 0.5 / src.h).toFixed(4);
+  addLayer(L);
+}
+function buildTextProps(box, L, add) {
+  const ta = h('textarea', { rows: 2, class: 'grow', spellcheck: 'false' }); ta.value = L.text;
+  ta.addEventListener('input', () => { L.text = ta.value; onLayerEdit(L, true); });
+  ta.addEventListener('change', commit);
+  box.append(h('div', { class: 'row' }, h('label', {}, 'Text'), ta));
+  // font picker
+  const filt = segRow('Fonts', [['all', 'All'], ['google', 'Google'], ['local', 'Installed']], () => fontFilter, v => { fontFilter = v; }, () => fillList());
+  box.append(filt);
+  const search = h('input', { type: 'text', class: 'grow', placeholder: 'Search fonts', value: fontSearch });
+  search.addEventListener('input', () => { fontSearch = search.value; fillList(); });
+  box.append(h('div', { class: 'row' }, h('label', {}, ''), search));
+  const list = h('select', { class: 'grow fontlist', size: 8 });
+  const cur = h('div', { class: 'note' });
+  const showCur = () => { cur.textContent = `Font: ${L.font} (${L.source === 'google' ? 'Google' : 'installed'})${L.source === 'google' && fontState.get(gKey(L.font, L.weight, L.italic)) === 'loading' ? ', loading...' : ''}`; };
+  function fillList() {
+    list.innerHTML = '';
+    const q = fontSearch.trim().toLowerCase();
+    const items = [];
+    if (fontFilter !== 'local') for (const [f, cat] of GOOGLE_FONTS) items.push({ f, src: 'google', tag: 'Google ' + cat.toLowerCase() });
+    if (fontFilter !== 'google') for (const f of localFontList()) items.push({ f, src: 'local', tag: 'installed' });
+    for (const it of items) {
+      if (q && !it.f.toLowerCase().includes(q)) continue;
+      const o = h('option', { value: it.src + '|' + it.f }, `${it.f}  ·  ${it.tag}`);
+      if (it.src === 'local') o.style.fontFamily = `"${it.f}", sans-serif`;
+      if (it.f === L.font && it.src === L.source) o.selected = true;
+      list.append(o);
+    }
+  }
+  list.addEventListener('change', () => {
+    const [src, ...rest] = list.value.split('|');
+    L.source = src; L.font = rest.join('|'); showCur(); onLayerEdit(L, true); commit();
+  });
+  fillList(); showCur();
+  box.append(h('div', { class: 'row' }, list));
+  const other = h('input', { type: 'text', class: 'grow', placeholder: 'Other font name' });
+  const useAs = (src) => { const f = other.value.trim(); if (!f) return; L.font = f; L.source = src; showCur(); onLayerEdit(L, true); commit(); };
+  box.append(h('div', { class: 'row' }, other,
+    h('button', { title: 'Load this family from Google Fonts', onclick: () => useAs('google') }, 'Google'),
+    h('button', { title: 'Use a font installed on this computer', onclick: () => useAs('local') }, 'Local')));
+  box.append(h('div', { class: 'rowbtns' }, h('button', { onclick: findInstalledFonts, title: 'Lists every installed font (Chrome / Edge ask for permission)' }, 'Find installed fonts')));
+  box.append(cur);
+  box.append(selectRow('Weight', [100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => [w, String(w)]), () => L.weight, v => L.weight = +v, () => { showCur(); onLayerEdit(L, true); }));
+  box.append(checkRow('Italic', () => L.italic, v => L.italic = v, () => { showCur(); onLayerEdit(L, true); }));
+  box.append(segRow('Align', [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], () => L.align, v => L.align = v, () => onLayerEdit(L, true)));
+  add(sliderRow('Letter spacing', () => L.spacing, v => L.spacing = v, { min: -20, max: 100, step: 0.5, onInput: () => onLayerEdit(L, true), tip: 'Percent of the font size' }));
+  add(sliderRow('Line height', () => L.lineHeight, v => L.lineHeight = v, { min: 0.6, max: 2.5, step: 0.01, onInput: () => onLayerEdit(L, true) }));
+  box.append(selectRow('Detail', [[128, '128 px'], [256, '256 px'], [512, '512 px']], () => L.detail, v => L.detail = +v, () => onLayerEdit(L, true)));
+  box.append(segRow('Field', [['sdf', 'SDF (EDT)'], ['blur', 'Blur + Level']], () => L.mode, v => L.mode = v, () => { buildProps(); onLayerEdit(L, true); }));
+  if (L.mode === 'sdf') add(sliderRow('Smooth', () => L.smooth, v => L.smooth = v, { min: 0, max: 20, step: 0.1, onInput: () => onLayerEdit(L, true), tip: 'Gaussian on the distance field (text px)' }));
+  else {
+    add(sliderRow('Blur', () => L.blur, v => L.blur = v, { min: 0.5, max: 100, step: 0.5, onInput: () => onLayerEdit(L, true) }));
+    add(sliderRow('Level', () => L.level, v => L.level = v, { min: 0.01, max: 0.99, step: 0.01, onInput: () => onLayerEdit(L, true) }));
+  }
+}
+
+const scratch = document.createElement('canvas');
+const sctx = scratch.getContext('2d', { willReadFrequently: true });
+
+function imageKey(L) { return [L.type === 'text' ? textKey(L) : L.asset, L.res, L.mode, L.invert, L.autoThr, L.thr, L.smooth, L.blur, L.level].join('|'); }
+
+function processImage(L) {
+  const a = rasterSource(L); if (!a) return null;
+  const key = imageKey(L);
+  const old = imgCache.get(L.id);
+  if (old && old.key === key) return old;
+  const t0 = performance.now();
+  const sc = Math.min(1, L.res / Math.max(a.w, a.h));
+  const w = Math.max(1, Math.round(a.w * sc)), h = Math.max(1, Math.round(a.h * sc));
+  const blurTex = (L.mode === 'blur' ? L.blur : L.smooth) * sc;
+  const P = 4 + Math.ceil(3 * blurTex);
+  const W = w + 2 * P, H = h + 2 * P;
+  scratch.width = w; scratch.height = h;
+  sctx.clearRect(0, 0, w, h);
+  sctx.imageSmoothingQuality = 'high';
+  sctx.drawImage(a.img, 0, 0, w, h);
+  const px = sctx.getImageData(0, 0, w, h).data;
+  const ink = new Float32Array(W * H);
+  const inner = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = (y * w + x) * 4;
+    let v;
+    if (a.hasAlpha) v = px[o + 3] / 255;
+    else v = (0.2126 * px[o] + 0.7152 * px[o + 1] + 0.0722 * px[o + 2]) / 255;
+    if (L.invert) v = 1 - v;
+    inner[y * w + x] = v;
+    ink[(y + P) * W + x + P] = v;
+  }
+  let data;
+  if (L.mode === 'blur') {
+    const sig = Math.max(0.5, L.blur * sc);
+    gaussian(ink, W, H, sig);
+    data = new Float32Array(W * H);
+    const k = 2 * sig;
+    for (let i = 0; i < data.length; i++) data[i] = (L.level - ink[i]) * k;
+  } else {
+    const thr = L.autoThr ? otsu(inner) : L.thr;
+    L._otsu = L.autoThr ? thr : L._otsu;
+    const fo = new Float64Array(W * H), fi = new Float64Array(W * H);
+    for (let i = 0; i < ink.length; i++) { const inside = ink[i] >= thr; fo[i] = inside ? 0 : INF; fi[i] = inside ? INF : 0; }
+    edt2d(fo, W, H); edt2d(fi, W, H);
+    data = new Float32Array(W * H);
+    for (let i = 0; i < data.length; i++) {
+      if (fo[i] > 0) data[i] = Math.min(Math.sqrt(fo[i]), 1e4) - 0.5;
+      else data[i] = -(Math.min(Math.sqrt(fi[i]), 1e4) - 0.5);
+    }
+    // Sub-pixel edge: on anti-aliased edge pixels use the coverage instead of the binary EDT
+    // value, which removes most of the pixel staircase before smoothing.
+    for (let i = 0; i < data.length; i++) {
+      const v = ink[i];
+      if (v > 0.02 && v < 0.98 && Math.abs(data[i]) <= 1.5) data[i] = thr - v;
+    }
+    gaussian(data, W, H, L.smooth * sc);
+  }
+  if (old && old.tex) gl.deleteTexture(old.tex);
+  const tex = makeTex(gl.R32F, W, H, gl.RED, gl.FLOAT, data, gl.NEAREST);
+  const c = { key, W, H, sc, data, tex, ms: performance.now() - t0 };
+  imgCache.set(L.id, c);
+  return c;
+}
+let imgTimer = null;
+function scheduleImage(L) {
+  clearTimeout(imgTimer);
+  imgTimer = setTimeout(() => { processImage(L); requestRender(); scheduleVector(); }, 40);
+}
+function processAllImages() { for (const L of state.layers) if (isRaster(L)) processImage(L); }
+
+/* ============================================================================
+   Assets
+   ========================================================================== */
+function loadAssetFromDataURL(dataURL, name, key) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      const s = Math.min(1, 256 / Math.max(w, h)), tw = Math.max(1, Math.round(w * s)), th = Math.max(1, Math.round(h * s));
+      scratch.width = tw; scratch.height = th; sctx.clearRect(0, 0, tw, th); sctx.drawImage(img, 0, 0, tw, th);
+      const d = sctx.getImageData(0, 0, tw, th).data;
+      let trans = 0, borderSum = 0, borderN = 0;
+      for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++) {
+        const o = (y * tw + x) * 4;
+        if (d[o + 3] < 250) trans++;
+        if (x === 0 || y === 0 || x === tw - 1 || y === th - 1) { borderSum += (0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]) / 255; borderN++; }
+      }
+      const hasAlpha = trans > tw * th * 0.01;
+      const autoInvert = !hasAlpha && borderSum / borderN > 0.5;
+      key = key || ('A' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
+      assets.set(key, { name, dataURL, img, w, h, hasAlpha, autoInvert });
+      res(key);
+    };
+    img.onerror = () => rej(new Error('Could not decode image ' + name));
+    img.src = dataURL;
+  });
+}
+function readFileAsDataURL(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+}
+
+/* ============================================================================
+   Layers
+   ========================================================================== */
+function viewCenterDoc() {
+  const cx = (glCanvas.width / 2 - view.ox) / view.s, cy = (glCanvas.height / 2 - view.oy) / view.s;
+  const d = state.doc;
+  if (cx < 0 || cy < 0 || cx > d.w || cy > d.h) return [d.w / 2, d.h / 2];
+  return [Math.round(cx), Math.round(cy)];
+}
+function nextName(type) {
+  const base = TYPE_LABEL[type]; let n = 1;
+  const names = new Set(state.layers.map(l => l.name));
+  while (names.has(base + ' ' + n)) n++;
+  return base + ' ' + n;
+}
+function makeShape(type) {
+  const [x, y] = viewCenterDoc();
+  const m = Math.min(state.doc.w, state.doc.h);
+  const L = { id: uid(), type, name: nextName(type), visible: true, op: 'union', k: Math.round(m * 0.04), style: 'round', profile: 0.6, contact: 0, grow: 0, x, y, scale: 1, rot: 0 };
+  const r = Math.round(m * 0.12);
+  switch (type) {
+    case 'circle': L.r = r; break;
+    case 'ellipse': L.rx = Math.round(r * 1.5); L.ry = Math.round(r * 0.8); break;
+    case 'box': L.w = r * 2; L.h = Math.round(r * 1.4); L.round = Math.round(r * 0.15); break;
+    case 'capsule': L.len = r * 2; L.r = Math.round(r * 0.45); break;
+    case 'star': L.n = 5; L.r = r; L.sharp = 0.55; break;
+    case 'ring': L.r = r; L.t = Math.round(r * 0.35); break;
+  }
+  return L;
+}
+function addLayer(L) {
+  const i = state.selected ? state.layers.findIndex(l => l.id === state.selected) : -1;
+  if (i >= 0) state.layers.splice(i + 1, 0, L); else state.layers.push(L);
+  state.selected = L.id;
+  if (isRaster(L)) processImage(L);
+  layersChanged(); commit();
+}
+function addShape(type) { addLayer(makeShape(type)); }
+async function addImageAsset(key) {
+  const a = assets.get(key);
+  const d = state.doc;
+  const scale = Math.min(d.w * 0.8 / a.w, d.h * 0.8 / a.h);
+  const [x, y] = viewCenterDoc();
+  const L = {
+    id: uid(), type: 'image', name: a.name.replace(/\.[^.]+$/, '') || nextName('image'), visible: true, op: 'union',
+    k: Math.round(Math.min(d.w, d.h) * 0.02), style: 'round', profile: 0.6, contact: 0, grow: 0, x, y, scale: +scale.toFixed(4), rot: 0,
+    asset: key, res: 1024, mode: 'sdf', invert: a.autoInvert, autoThr: true, thr: 0.5, smooth: 1.0, blur: 8, level: 0.5,
+  };
+  addLayer(L);
+  setStatus(`Image "${a.name}" ${a.w}x${a.h}${a.autoInvert ? ' (dark shape detected, inverted)' : ''}${a.hasAlpha ? ' (using alpha)' : ''}`);
+}
+async function addImageFiles(files) {
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    try { const key = await loadAssetFromDataURL(await readFileAsDataURL(f), f.name); await addImageAsset(key); }
+    catch (e) { setStatus(e.message); }
+  }
+}
+async function setReferenceFile(f) {
+  try {
+    const key = await loadAssetFromDataURL(await readFileAsDataURL(f), f.name);
+    setReferenceAsset(key, true); commit();
+  } catch (e) { setStatus(e.message); }
+}
+function setReferenceAsset(key, fit) {
+  const r = state.ref, a = assets.get(key);
+  r.asset = key;
+  if (fit && a) { r.scale = +Math.min(state.doc.w / a.w, state.doc.h / a.h).toFixed(4); r.x = state.doc.w / 2; r.y = state.doc.h / 2; r.visible = true; }
+  buildRefPanel(); requestRender();
+}
+function selectedLayer() { return state.layers.find(l => l.id === state.selected) || null; }
+function layersChanged() {
+  processAllImages();
+  // drop caches of deleted layers
+  for (const id of [...imgCache.keys()]) if (!state.layers.some(l => l.id === id)) { const c = imgCache.get(id); if (c.tex) gl.deleteTexture(c.tex); imgCache.delete(id); }
+  buildLayerList(); buildProps(); requestRender(); scheduleVector();
+}
+
+/* ============================================================================
+   CPU distance per layer (hit testing)
+   ========================================================================== */
+function sdStarJS(x, y, r, n, m) {
+  const an = Math.PI / n, en = Math.PI / m;
+  const acx = Math.cos(an), acy = Math.sin(an), ecx = Math.cos(en), ecy = Math.sin(en);
+  const a = Math.atan2(x, -y), m2 = 2 * an;
+  const bn = ((a % m2) + m2) % m2 - an;
+  const len = Math.hypot(x, y);
+  let px = len * Math.cos(bn), py = len * Math.abs(Math.sin(bn));
+  px -= r * acx; py -= r * acy;
+  const t = clamp(-(px * ecx + py * ecy), 0, r * acy / ecy);
+  px += ecx * t; py += ecy * t;
+  return Math.hypot(px, py) * Math.sign(px);
+}
+function layerDist(L, X, Y) {
+  const th = (L.rot || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  const u = layerUniforms(L), sc = u.P[0], Q = u.Q;
+  const dx = X - L.x, dy = Y - L.y;
+  const x = (c * dx + s * dy) / sc, y = (-s * dx + c * dy) / sc;
+  let d;
+  switch (L.type) {
+    case 'circle': d = Math.hypot(x, y) - Q[0]; break;
+    case 'ellipse': { const rx = Math.max(Q[0], 1e-3), ry = Math.max(Q[1], 1e-3); const k0 = Math.hypot(x / rx, y / ry), k1 = Math.hypot(x / (rx * rx), y / (ry * ry)); d = k1 > 1e-8 ? k0 * (k0 - 1) / k1 : -Math.min(rx, ry); break; }
+    case 'box': { const rr = Math.min(Q[2], Q[0], Q[1]); const qx = Math.abs(x) - Q[0] + rr, qy = Math.abs(y) - Q[1] + rr; d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - rr; break; }
+    case 'capsule': { let ax = Math.abs(x); ax -= clamp(ax, 0, Q[0]); d = Math.hypot(ax, y) - Q[1]; break; }
+    case 'star': d = sdStarJS(x, y, Q[0], Q[1], Q[2]); break;
+    case 'ring': d = Math.abs(Math.hypot(x, y) - Q[0]) - Q[1] / 2; break;
+    case 'image': case 'text': {
+      const cch = imgCache.get(L.id); if (!cch) return 1e9;
+      const W = cch.W, H = cch.H;
+      const ux = x + W / 2, uy = y + H / 2;
+      const cx = clamp(ux, 0.5, W - 0.5), cy = clamp(uy, 0.5, H - 0.5);
+      const ext = Math.hypot(ux - cx, uy - cy);
+      const fx = cx - 0.5, fy = cy - 0.5, ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy;
+      const g = (i, j) => cch.data[Math.min(j, H - 1) * W + Math.min(i, W - 1)];
+      d = (g(ix, iy) * (1 - tx) + g(ix + 1, iy) * tx) * (1 - ty) + (g(ix, iy + 1) * (1 - tx) + g(ix + 1, iy + 1) * tx) * ty + ext;
+      break;
+    }
+    default: d = 1e9;
+  }
+  return d * sc - (L.grow || 0);
+}
+function layerHalfExtents(L) {
+  // half size in doc px (before rotation)
+  const s = L.scale;
+  switch (L.type) {
+    case 'circle': return [L.r * s, L.r * s];
+    case 'ellipse': return [L.rx * s, L.ry * s];
+    case 'box': return [L.w / 2 * s, L.h / 2 * s];
+    case 'capsule': return [(L.len / 2 + L.r) * s, L.r * s];
+    case 'star': return [L.r * s, L.r * s];
+    case 'ring': return [(L.r + L.t / 2) * s, (L.r + L.t / 2) * s];
+    case 'image': case 'text': { const a = rasterSource(L); return a ? [a.w * s / 2, a.h * s / 2] : [10, 10]; }
+  }
+  return [10, 10];
+}
+function layerCorners(L, pad = 0) {
+  const [hx, hy] = layerHalfExtents(L);
+  const th = (L.rot || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  const ex = hx + pad, ey = hy + pad;
+  return [[-ex, -ey], [ex, -ey], [ex, ey], [-ex, ey]].map(([x, y]) => [L.x + c * x - s * y, L.y + s * x + c * y]);
+}
+function pointInLayerBox(L, X, Y) {
+  const [hx, hy] = layerHalfExtents(L);
+  const th = (L.rot || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  const dx = X - L.x, dy = Y - L.y;
+  const x = c * dx + s * dy, y = -s * dx + c * dy;
+  return Math.abs(x) <= hx && Math.abs(y) <= hy;
+}
+
+/* ============================================================================
+   Overlay: doc border, gizmo, vector paths
+   ========================================================================== */
+let vectorResult = null;
+function docToScreen(x, y) { return [view.ox + x * view.s, view.oy + y * view.s]; }
+function gizmoHandles(L) {
+  const cs = layerCorners(L, 0).map(p => docToScreen(p[0], p[1]));
+  const th = (L.rot || 0) * Math.PI / 180;
+  const top = [(cs[0][0] + cs[1][0]) / 2, (cs[0][1] + cs[1][1]) / 2];
+  const off = 26 * dpr;
+  const rot = [top[0] + Math.sin(th) * off, top[1] - Math.cos(th) * off];
+  return { corners: cs, top, rot };
+}
+function drawOverlay() {
+  const w = ovCanvas.width, h = ovCanvas.height;
+  ov.setTransform(1, 0, 0, 1, 0, 0);
+  ov.clearRect(0, 0, w, h);
+  // doc border
+  const [x0, y0] = docToScreen(0, 0), [x1, y1] = docToScreen(state.doc.w, state.doc.h);
+  ov.strokeStyle = 'rgba(255,255,255,0.25)'; ov.lineWidth = 1;
+  ov.strokeRect(Math.round(x0) + 0.5, Math.round(y0) + 0.5, Math.round(x1 - x0), Math.round(y1 - y0));
+  // vector overlay
+  if (state.preview.vector && vectorResult) {
+    ov.save();
+    ov.setTransform(view.s, 0, 0, view.s, view.ox, view.oy);
+    ov.lineWidth = 1.5 * dpr / view.s;
+    ov.strokeStyle = '#00e5ff';
+    ov.stroke(new Path2D(vectorResult.fillD));
+    if (vectorResult.ringD) { ov.strokeStyle = '#ffb347'; ov.stroke(new Path2D(vectorResult.ringD)); }
+    ov.restore();
+    if (state.preview.handles && vectorResult.handles) {
+      ov.strokeStyle = 'rgba(255,255,255,0.45)'; ov.fillStyle = '#c9d1d9'; ov.lineWidth = 1 * dpr;
+      ov.beginPath();
+      for (const [a, b] of vectorResult.handles) { const [ax, ay] = docToScreen(a[0], a[1]), [bx, by] = docToScreen(b[0], b[1]); ov.moveTo(ax, ay); ov.lineTo(bx, by); }
+      ov.stroke();
+      const hr = 2.2 * dpr;
+      for (const [, b] of vectorResult.handles) { const [bx, by] = docToScreen(b[0], b[1]); ov.beginPath(); ov.arc(bx, by, hr, 0, Math.PI * 2); ov.fill(); }
+    }
+    if (state.preview.nodes || state.preview.handles) {
+      const r = 2.8 * dpr;
+      for (const n of vectorResult.nodes) {
+        const [sx, sy] = docToScreen(n.p[0], n.p[1]);
+        ov.fillStyle = n.corner ? '#ff9a3d' : '#ffffff';
+        ov.fillRect(sx - r, sy - r, 2 * r, 2 * r);
+      }
+    }
+  }
+  // reference box when selected
+  if (state.selected === '__ref' && state.ref.asset) {
+    const a = assets.get(state.ref.asset);
+    if (a) {
+      const r = state.ref;
+      const [ax, ay] = docToScreen(r.x - a.w * r.scale / 2, r.y - a.h * r.scale / 2);
+      ov.setLineDash([6 * dpr, 4 * dpr]); ov.strokeStyle = r.locked ? '#888' : '#ffcc66'; ov.lineWidth = 1 * dpr;
+      ov.strokeRect(ax, ay, a.w * r.scale * view.s, a.h * r.scale * view.s); ov.setLineDash([]);
+    }
+  }
+  // gizmo
+  const L = selectedLayer();
+  if (L) {
+    const g = gizmoHandles(L);
+    ov.lineWidth = 1 * dpr;
+    ov.strokeStyle = L.op === 'subtract' ? '#ff7a7a' : L.op === 'intersect' ? '#f2c94c' : '#6fd08c';
+    ov.setLineDash(L.visible ? [] : [4 * dpr, 4 * dpr]);
+    ov.beginPath(); g.corners.forEach((p, i) => i ? ov.lineTo(p[0], p[1]) : ov.moveTo(p[0], p[1])); ov.closePath(); ov.stroke();
+    ov.setLineDash([]);
+    ov.beginPath(); ov.moveTo(g.top[0], g.top[1]); ov.lineTo(g.rot[0], g.rot[1]); ov.stroke();
+    ov.fillStyle = '#fff';
+    const hs = 4 * dpr;
+    for (const p of g.corners) { ov.fillRect(p[0] - hs, p[1] - hs, 2 * hs, 2 * hs); ov.strokeRect(p[0] - hs, p[1] - hs, 2 * hs, 2 * hs); }
+    ov.beginPath(); ov.arc(g.rot[0], g.rot[1], 5 * dpr, 0, Math.PI * 2); ov.fill(); ov.stroke();
+    const [cx, cy] = docToScreen(L.x, L.y);
+    ov.beginPath(); ov.moveTo(cx - 5 * dpr, cy); ov.lineTo(cx + 5 * dpr, cy); ov.moveTo(cx, cy - 5 * dpr); ov.lineTo(cx, cy + 5 * dpr); ov.stroke();
+  }
+}
+
+/* ============================================================================
+   Vectorization: marching squares -> corner split -> Schneider Bezier fit
+   ========================================================================== */
+function contour(g, W, H, level) {
+  const OUT = 1.0;
+  const val = (i, j) => (i < 0 || j < 0 || i >= W || j >= H) ? OUT : g[j * W + i] - level;
+  const W2 = W + 2;
+  const keyH = (i, j) => ((j + 1) * W2 + (i + 1)) * 2;
+  const keyV = (i, j) => ((j + 1) * W2 + (i + 1)) * 2 + 1;
+  const next = new Map();
+  const vals = [0, 0, 0, 0], keys = [0, 0, 0, 0];
+  const xsKey = [0, 0, 0, 0], xsExit = [false, false, false, false];
+  for (let j = -1; j < H; j++) {
+    for (let i = -1; i < W; i++) {
+      const va = val(i, j), vb = val(i + 1, j), vc = val(i + 1, j + 1), vd = val(i, j + 1);
+      const idx = (va < 0 ? 1 : 0) | (vb < 0 ? 2 : 0) | (vc < 0 ? 4 : 0) | (vd < 0 ? 8 : 0);
+      if (idx === 0 || idx === 15) continue;
+      vals[0] = va; vals[1] = vb; vals[2] = vc; vals[3] = vd;
+      keys[0] = keyH(i, j); keys[1] = keyV(i + 1, j); keys[2] = keyH(i, j + 1); keys[3] = keyV(i, j);
+      let n = 0;
+      for (let k = 0; k < 4; k++) {
+        const v0 = vals[k], v1 = vals[(k + 1) & 3];
+        if ((v0 < 0) !== (v1 < 0)) { xsKey[n] = keys[k]; xsExit[n] = v0 < 0; n++; }
+      }
+      if (n === 2) {
+        if (xsExit[0]) next.set(xsKey[1], xsKey[0]); else next.set(xsKey[0], xsKey[1]);
+      } else if (n === 4) {
+        const center = (va + vb + vc + vd) / 4;
+        for (let m = 0; m < 4; m++) {
+          if (xsExit[m]) continue;
+          const partner = center < 0 ? (m + 3) & 3 : (m + 1) & 3;
+          next.set(xsKey[m], xsKey[partner]);
+        }
+      }
+    }
+  }
+  const pos = (key) => {
+    const v = key & 1, base = key >> 1;
+    const i = base % W2 - 1, j = Math.floor(base / W2) - 1;
+    const x1 = v ? i : i + 1, y1 = v ? j + 1 : j;
+    const v0 = val(i, j), v1 = val(x1, y1);
+    let t = v0 / (v0 - v1); if (!isFinite(t)) t = 0.5; t = clamp(t, 0, 1);
+    return [i + (x1 - i) * t, j + (y1 - j) * t];
+  };
+  const loops = [], seen = new Set();
+  for (const start of next.keys()) {
+    if (seen.has(start)) continue;
+    const pts = []; let k = start, guard = 0;
+    while (k !== undefined && !seen.has(k) && guard++ < 1e7) { seen.add(k); pts.push(pos(k)); k = next.get(k); }
+    if (pts.length >= 3) loops.push(pts);
+  }
+  return loops;
+}
+function polyArea(p) { let a = 0; for (let i = 0, j = p.length - 1; i < p.length; j = i++) a += (p[j][0] + p[i][0]) * (p[j][1] - p[i][1]); return a / 2; }
+
+const v2 = {
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1]], add: (a, b) => [a[0] + b[0], a[1] + b[1]], mul: (a, s) => [a[0] * s, a[1] * s],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1], len: (a) => Math.hypot(a[0], a[1]),
+  norm: (a) => { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; }, neg: (a) => [-a[0], -a[1]],
+};
+// Schneider (Graphics Gems) curve fitting
+function bez(b, t) {
+  const mt = 1 - t, a = mt * mt * mt, c = 3 * mt * mt * t, d = 3 * mt * t * t, e = t * t * t;
+  return [a * b[0][0] + c * b[1][0] + d * b[2][0] + e * b[3][0], a * b[0][1] + c * b[1][1] + d * b[2][1] + e * b[3][1]];
+}
+function bezD1(b, t) {
+  const mt = 1 - t;
+  return [3 * mt * mt * (b[1][0] - b[0][0]) + 6 * mt * t * (b[2][0] - b[1][0]) + 3 * t * t * (b[3][0] - b[2][0]),
+          3 * mt * mt * (b[1][1] - b[0][1]) + 6 * mt * t * (b[2][1] - b[1][1]) + 3 * t * t * (b[3][1] - b[2][1])];
+}
+function bezD2(b, t) {
+  const mt = 1 - t;
+  return [6 * mt * (b[2][0] - 2 * b[1][0] + b[0][0]) + 6 * t * (b[3][0] - 2 * b[2][0] + b[1][0]),
+          6 * mt * (b[2][1] - 2 * b[1][1] + b[0][1]) + 6 * t * (b[3][1] - 2 * b[2][1] + b[1][1])];
+}
+function chordParam(d, first, last) {
+  const u = [0];
+  for (let i = first + 1; i <= last; i++) u.push(u[u.length - 1] + v2.len(v2.sub(d[i], d[i - 1])));
+  const tot = u[u.length - 1] || 1;
+  return u.map(x => x / tot);
+}
+function generateBezier(d, first, last, u, t1, t2) {
+  const p0 = d[first], p3 = d[last];
+  let c00 = 0, c01 = 0, c11 = 0, x0 = 0, x1 = 0;
+  for (let i = 0; i < u.length; i++) {
+    const t = u[i], mt = 1 - t;
+    const b0 = mt * mt * mt, b1 = 3 * mt * mt * t, b2 = 3 * mt * t * t, b3 = t * t * t;
+    const a0 = v2.mul(t1, b1), a1 = v2.mul(t2, b2);
+    c00 += v2.dot(a0, a0); c01 += v2.dot(a0, a1); c11 += v2.dot(a1, a1);
+    const tmp = v2.sub(d[first + i], [p0[0] * (b0 + b1) + p3[0] * (b2 + b3), p0[1] * (b0 + b1) + p3[1] * (b2 + b3)]);
+    x0 += v2.dot(a0, tmp); x1 += v2.dot(a1, tmp);
+  }
+  const det = c00 * c11 - c01 * c01;
+  let al = Math.abs(det) > 1e-12 ? (x0 * c11 - x1 * c01) / det : 0;
+  let ar = Math.abs(det) > 1e-12 ? (c00 * x1 - c01 * x0) / det : 0;
+  const segLen = v2.len(v2.sub(p3, p0)), eps = 1e-6 * segLen;
+  if (al < eps || ar < eps || al > segLen * 2 || ar > segLen * 2) { al = ar = segLen / 3; }
+  return [p0, v2.add(p0, v2.mul(t1, al)), v2.add(p3, v2.mul(t2, ar)), p3];
+}
+function maxError(d, first, last, b, u) {
+  let maxD = 0, split = Math.floor((last - first + 1) / 2) + first;
+  for (let i = first + 1; i < last; i++) {
+    const p = bez(b, u[i - first]);
+    const dd = (p[0] - d[i][0]) ** 2 + (p[1] - d[i][1]) ** 2;
+    if (dd >= maxD) { maxD = dd; split = i; }
+  }
+  return [maxD, clamp(split, first + 1, last - 1)];
+}
+function reparam(d, first, last, u, b) {
+  return u.map((t, i) => {
+    const P = d[first + i], Q = bez(b, t), Q1 = bezD1(b, t), Q2 = bezD2(b, t);
+    const diff = v2.sub(Q, P);
+    const num = v2.dot(diff, Q1), den = v2.dot(Q1, Q1) + v2.dot(diff, Q2);
+    if (Math.abs(den) < 1e-12) return t;
+    return clamp(t - num / den, 0, 1);
+  });
+}
+function fitCubic(d, first, last, t1, t2, err2, out, depth) {
+  const n = last - first + 1;
+  if (n === 2) {
+    const dist = v2.len(v2.sub(d[last], d[first])) / 3;
+    out.push([d[first], v2.add(d[first], v2.mul(t1, dist)), v2.add(d[last], v2.mul(t2, dist)), d[last]]);
+    return;
+  }
+  let u = chordParam(d, first, last);
+  let b = generateBezier(d, first, last, u, t1, t2);
+  let [maxE, split] = maxError(d, first, last, b, u);
+  if (maxE < err2) { out.push(b); return; }
+  if (maxE < err2 * 4) {
+    for (let it = 0; it < 4; it++) {
+      u = reparam(d, first, last, u, b);
+      b = generateBezier(d, first, last, u, t1, t2);
+      [maxE, split] = maxError(d, first, last, b, u);
+      if (maxE < err2) { out.push(b); return; }
+    }
+  }
+  if (depth > 48) { out.push(b); return; }
+  const tc = v2.norm(v2.sub(d[split - 1], d[split + 1]));
+  fitCubic(d, first, split, t1, tc, err2, out, depth + 1);
+  fitCubic(d, split, last, v2.neg(tc), t2, err2, out, depth + 1);
+}
+function tangentAt(pts, i, dir, steps) {
+  const n = pts.length;
+  const j = clamp(i + dir * steps, 0, n - 1);
+  return v2.norm(v2.sub(pts[j], pts[i]));
+}
+let cornerWin = 3;
+function fitLoop(P, tol, cornerDeg) {
+  // dedupe
+  const pts = [];
+  for (const p of P) { const l = pts[pts.length - 1]; if (!l || Math.hypot(p[0] - l[0], p[1] - l[1]) > 1e-3) pts.push(p); }
+  while (pts.length > 2 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-3) pts.pop();
+  const n = pts.length;
+  if (n < 3) return null;
+  const err2 = tol * tol;
+  // corners: turning angle measured over a small arc window, with non-maximum suppression
+  let corners = [];
+  if (cornerDeg < 179.5 && n >= 8) {
+    const win = cornerWin;
+    const ang = new Float32Array(n), back = new Int32Array(n), fwd = new Int32Array(n);
+    for (let i = 0; i < n; i++) {
+      let b = i, f = i, acc = 0, guard = 0;
+      while (acc < win && guard++ < n / 3) { const nb = (b - 1 + n) % n; acc += Math.hypot(pts[b][0] - pts[nb][0], pts[b][1] - pts[nb][1]); b = nb; }
+      acc = 0; guard = 0;
+      while (acc < win && guard++ < n / 3) { const nf = (f + 1) % n; acc += Math.hypot(pts[nf][0] - pts[f][0], pts[nf][1] - pts[f][1]); f = nf; }
+      back[i] = b; fwd[i] = f;
+      const e1 = v2.sub(pts[i], pts[b]), e2 = v2.sub(pts[f], pts[i]);
+      const l1 = v2.len(e1), l2 = v2.len(e2);
+      ang[i] = (l1 > 1e-6 && l2 > 1e-6) ? Math.acos(clamp(v2.dot(e1, e2) / (l1 * l2), -1, 1)) * 180 / Math.PI : 0;
+    }
+    for (let i = 0; i < n; i++) {
+      if (ang[i] < cornerDeg) continue;
+      let isMax = true;
+      for (let j = back[i]; j !== fwd[i]; j = (j + 1) % n) {
+        if (j === i) continue;
+        if (ang[j] > ang[i] || (ang[j] === ang[i] && j < i)) { isMax = false; break; }
+      }
+      if (isMax) corners.push(i);
+    }
+  }
+  // Corner recovery: intersect the incoming and outgoing edge lines. A true sharp corner is only
+  // chamfered by marching squares, so the recovered point lands within ~1 grid px of the contour.
+  // A tight arc (small fillet) also turns fast, but its tangent intersection lands far outside the
+  // curve: that is not a corner, it stays smooth.
+  const w = cornerWin, CHAMFER_MAX = 1.5;
+  const gap = (a, b) => ((b - a) % n + n) % n || n; // index steps from a forward to b
+  const walk = (i, dir, dist, maxSteps) => {
+    let acc = 0, j = i, steps = 0;
+    while (acc < dist && steps < maxSteps) { const nj = (j + dir + n) % n; acc += Math.hypot(pts[nj][0] - pts[j][0], pts[nj][1] - pts[j][1]); j = nj; steps++; }
+    return j;
+  };
+  const cornerInfo = (list) => list.map((c, k) => {
+    const m = list.length;
+    const prev = list[(k - 1 + m) % m], next = list[(k + 1) % m];
+    const mb = Math.max(1, Math.floor((m > 1 ? gap(prev, c) : n) / 2)), mf = Math.max(1, Math.floor((m > 1 ? gap(c, next) : n) / 2));
+    const ib = walk(c, -1, w, mb), ibb = walk(c, -1, 3 * w, mb), jf = walk(c, 1, w, mf), jff = walk(c, 1, 3 * w, mf);
+    let dIn = v2.norm(v2.sub(pts[ib], pts[ibb])), dOut = v2.norm(v2.sub(pts[jff], pts[jf]));
+    if (ib === ibb) dIn = v2.norm(v2.sub(pts[c], pts[ib]));
+    if (jf === jff) dOut = v2.norm(v2.sub(pts[jf], pts[c]));
+    let X = pts[c], ok = false;
+    const cr = dIn[0] * dOut[1] - dIn[1] * dOut[0];
+    if (Math.abs(cr) > 0.17) {
+      const qx = pts[jf][0] - pts[ib][0], qy = pts[jf][1] - pts[ib][1];
+      const t = (qx * dOut[1] - qy * dOut[0]) / cr;
+      const ix = [pts[ib][0] + dIn[0] * t, pts[ib][1] + dIn[1] * t];
+      if (Math.hypot(ix[0] - X[0], ix[1] - X[1]) <= CHAMFER_MAX) { X = ix; ok = true; }
+    } else if (v2.dot(dIn, dOut) < 0) ok = true; // near hairpin: keep as corner without moving it
+    return { c, X, dIn, dOut, ok };
+  });
+  let info = [];
+  if (corners.length) {
+    corners.sort((a, b) => a - b);
+    info = cornerInfo(corners);
+    const kept = info.filter(o => o.ok).map(o => o.c);
+    if (kept.length !== corners.length) { corners = kept; info = corners.length ? cornerInfo(corners) : []; }
+  }
+  const curves = [];
+  if (!corners.length) {
+    const d = pts.concat([pts[0]]);
+    const t1 = v2.norm(v2.sub(pts[1], pts[n - 1]));
+    fitCubic(d, 0, n, t1, v2.neg(t1), err2, curves, 0);
+  } else {
+    const m = corners.length;
+    for (let k = 0; k < m; k++) {
+      const A = info[k], B = info[(k + 1) % m];
+      const ax = A.ok ? A.X : pts[A.c], bx = B.ok ? B.X : pts[B.c];
+      const seg = [ax];
+      let i = (A.c + 1) % n;
+      while (i !== B.c) { seg.push(pts[i]); i = (i + 1) % n; }
+      seg.push(bx);
+      if (seg.length < 2) continue;
+      fitCubic(seg, 0, seg.length - 1, A.dOut, v2.neg(B.dIn), err2, curves, 0);
+    }
+  }
+  return curves;
+}
+function fmt(v) { return (Math.round(v * 100) / 100).toString(); }
+function curvesToD(curves, map) {
+  if (!curves || !curves.length) return '';
+  const m = (p) => map(p);
+  const s = m(curves[0][0]);
+  let d = `M${fmt(s[0])} ${fmt(s[1])}`;
+  for (const c of curves) {
+    const a = m(c[1]), b = m(c[2]), e = m(c[3]);
+    d += `C${fmt(a[0])} ${fmt(a[1])} ${fmt(b[0])} ${fmt(b[1])} ${fmt(e[0])} ${fmt(e[1])}`;
+  }
+  return d + 'Z';
+}
+function computeVector(q, opts = {}) {
+  const t0 = performance.now();
+  processAllImages();
+  const ex = state.export;
+  const F = renderField(q);
+  q = F.q;
+  const map = (p) => [(p[0] + 0.5) / q, (p[1] + 0.5) / q];
+  const tol = ex.tol * q, minA = ex.minArea * q * q;
+  cornerWin = Math.max(2.5, 1.5 * q);
+  let fillD = '', segs = 0, paths = 0;
+  const nodes = [], handles = [];
+  for (const loop of contour(F.g, F.W, F.H, 0)) {
+    if (Math.abs(polyArea(loop)) < minA) continue;
+    const curves = fitLoop(loop, tol, ex.corner);
+    if (!curves || !curves.length) continue;
+    fillD += curvesToD(curves, map); segs += curves.length; paths++;
+    if (opts.nodes) {
+      for (let i = 0; i < curves.length; i++) {
+        const c = curves[i], pv = curves[(i - 1 + curves.length) % curves.length];
+        const din = v2.norm(v2.sub(pv[3], pv[2])), dout = v2.norm(v2.sub(c[1], c[0]));
+        nodes.push({ p: map(c[0]), corner: v2.dot(din, dout) < Math.cos(12 * Math.PI / 180) });
+        if (opts.handles) { handles.push([map(c[0]), map(c[1])], [map(c[3]), map(c[2])]); }
+      }
+    }
+  }
+  let ringD = '', ringPaths = 0;
+  for (let r = 1; r <= ex.rings; r++) {
+    const lv = r * ex.ringStep * q;
+    if (Math.abs(lv) > 2000) break;
+    for (const loop of contour(F.g, F.W, F.H, lv)) {
+      if (Math.abs(polyArea(loop)) < minA) continue;
+      const curves = fitLoop(loop, tol, ex.corner);
+      if (!curves || !curves.length) continue;
+      ringD += curvesToD(curves, map); segs += curves.length; ringPaths++;
+    }
+  }
+  return { fillD, ringD, nodes, handles, paths, ringPaths, segs, ms: performance.now() - t0, W: F.W, H: F.H };
+}
+let vecTimer = null, vecLast = 0;
+function scheduleVector() {
+  if (!state.preview.vector) { vectorResult = null; requestRender(); return; }
+  clearTimeout(vecTimer);
+  const wait = Math.max(0, 90 - (performance.now() - vecLast));
+  vecTimer = setTimeout(runVectorPreview, dragging ? Math.max(wait, 60) : 60);
+}
+function runVectorPreview() {
+  vecLast = performance.now();
+  try {
+    const d = state.doc;
+    const budget = dragging ? 600000 : 2500000;
+    const q = Math.min(state.export.quality, Math.sqrt(budget / (d.w * d.h)));
+    vectorResult = computeVector(q, { nodes: state.preview.nodes || state.preview.handles, handles: state.preview.handles });
+    setStatus(`Vector preview: ${vectorResult.paths} paths, ${vectorResult.ringPaths} rings, ${vectorResult.segs} curves, ${vectorResult.ms.toFixed(0)} ms`);
+  } catch (e) { console.error(e); setStatus('Vector error: ' + e.message); }
+  requestRender();
+}
+
+/* ============================================================================
+   Export
+   ========================================================================== */
+function projectName() { return ($('projName').value.trim() || 'vectormelt').replace(/[\\/:*?"<>|]/g, '_'); }
+function download(name, blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function buildSVG() {
+  const ex = state.export, d = state.doc;
+  const r = computeVector(ex.quality);
+  let s = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  s += `<svg xmlns="http://www.w3.org/2000/svg" width="${d.w}" height="${d.h}" viewBox="0 0 ${d.w} ${d.h}">\n`;
+  s += `<!-- ${APP_NAME} v${APP_VERSION} -->\n`;
+  if (ex.includeBg) s += `<rect id="background" width="${d.w}" height="${d.h}" fill="${d.bg}"/>\n`;
+  const col = ex.svgColor || d.fg;
+  if (r.fillD) s += `<path id="shape" fill="${col}" fill-rule="evenodd" d="${r.fillD}"/>\n`;
+  if (r.ringD) s += `<path id="rings" fill="none" stroke="${col}" stroke-width="${ex.ringStroke}" stroke-linejoin="round" d="${r.ringD}"/>\n`;
+  s += `</svg>\n`;
+  return { svg: s, stats: r };
+}
+function exportSVG() {
+  try {
+    const { svg, stats } = buildSVG();
+    download(projectName() + '.svg', new Blob([svg], { type: 'image/svg+xml' }));
+    setStatus(`SVG exported: ${stats.paths} paths, ${stats.ringPaths} rings, ${stats.segs} curves (grid ${stats.W}x${stats.H}, ${stats.ms.toFixed(0)} ms)`);
+  } catch (e) { console.error(e); setStatus('Export error: ' + e.message); }
+}
+function buildPNGCanvas() {
+  processAllImages();
+  const d = state.doc, q = Math.min(state.export.quality, Math.min(MAX_TEX, 8192) / Math.max(d.w, d.h));
+  const W = Math.round(d.w * q), H = Math.round(d.h * q);
+  const px = renderOffscreen(W, H, { ox: 0, oy: 0, s: q }, state.export.pngTransparent ? 11 : 12);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d'), img = ctx.createImageData(W, H);
+  for (let row = 0; row < H; row++) img.data.set(px.subarray(row * W * 4, (row + 1) * W * 4), (H - 1 - row) * W * 4);
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+function exportPNG() {
+  const c = buildPNGCanvas();
+  c.toBlob(b => { download(projectName() + '.png', b); setStatus(`PNG exported ${c.width}x${c.height}`); }, 'image/png');
+}
+
+/* ============================================================================
+   Project save / load, undo
+   ========================================================================== */
+function snapshot() { return JSON.stringify({ doc: state.doc, ref: state.ref, layers: state.layers, selected: state.selected }); }
+const undoHist = []; let histIndex = -1;
+function commit() {
+  const s = snapshot();
+  if (histIndex >= 0 && undoHist[histIndex] === s) return;
+  undoHist.splice(histIndex + 1); undoHist.push(s);
+  if (undoHist.length > 150) undoHist.shift();
+  histIndex = undoHist.length - 1;
+  updateUndoButtons();
+}
+function restore(s) {
+  const o = JSON.parse(s);
+  state.doc = o.doc; state.ref = o.ref; state.layers = o.layers; state.selected = o.selected;
+  processAllImages();
+  layersChanged(); buildDocPanel(); buildRefPanel();
+}
+function undo() { if (histIndex > 0) { histIndex--; restore(undoHist[histIndex]); updateUndoButtons(); } }
+function redo() { if (histIndex < undoHist.length - 1) { histIndex++; restore(undoHist[histIndex]); updateUndoButtons(); } }
+function updateUndoButtons() { $('bUndo').disabled = histIndex <= 0; $('bRedo').disabled = histIndex >= undoHist.length - 1; }
+
+function saveProject() {
+  const used = new Set(state.layers.filter(l => l.type === 'image').map(l => l.asset));
+  if (state.ref.asset) used.add(state.ref.asset);
+  const as = {};
+  for (const k of used) { const a = assets.get(k); if (a) as[k] = { name: a.name, dataURL: a.dataURL }; }
+  const proj = { app: APP_NAME, format: 1, version: APP_VERSION, name: projectName(), saved: new Date().toISOString(),
+    doc: state.doc, preview: state.preview, export: state.export, ref: state.ref, layers: state.layers, assets: as };
+  download(projectName() + '.vmelt', new Blob([JSON.stringify(proj)], { type: 'application/json' }));
+  setStatus('Project saved');
+}
+async function loadProjectText(text) {
+  const p = JSON.parse(text);
+  if (p.app !== APP_NAME && !LEGACY_APP_NAMES.includes(p.app)) throw new Error('Not a VectorMelt project');
+  for (const [k, a] of Object.entries(p.assets || {})) if (!assets.has(k)) await loadAssetFromDataURL(a.dataURL, a.name, k);
+  for (const c of imgCache.values()) if (c.tex) gl.deleteTexture(c.tex);
+  imgCache.clear();
+  Object.assign(state.doc, p.doc); Object.assign(state.preview, p.preview || {}); Object.assign(state.export, p.export || {});
+  state.ref = Object.assign({ asset: null, opacity: 0.5, visible: true, locked: true, x: 0, y: 0, scale: 1 }, p.ref || {});
+  state.layers = p.layers || []; state.selected = null;
+  if (p.name) $('projName').value = p.name;
+  processAllImages();
+  undoHist.length = 0; histIndex = -1; commit();
+  fitView(); layersChanged(); buildDocPanel(); buildRefPanel(); buildPreviewPanel(); buildExportPanel();
+  setStatus(`Opened "${p.name || 'project'}" (saved with v${p.version})`);
+}
+function newProject() {
+  if (state.layers.length && !confirm('Start a new project? Unsaved changes are lost.')) return;
+  for (const c of imgCache.values()) if (c.tex) gl.deleteTexture(c.tex);
+  imgCache.clear();
+  state.layers = []; state.selected = null;
+  state.ref = { asset: null, opacity: 0.5, visible: true, locked: true, x: state.doc.w / 2, y: state.doc.h / 2, scale: 1 };
+  $('projName').value = 'vectormelt';
+  undoHist.length = 0; histIndex = -1; commit();
+  layersChanged(); buildRefPanel();
+}
+
+/* ============================================================================
+   UI widgets
+   ========================================================================== */
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (k === 'class') e.className = v;
+    else if (v !== undefined && v !== null && v !== false) e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids) if (k !== null && k !== undefined) e.append(k);
+  return e;
+}
+function sliderRow(label, get, set, o = {}) {
+  const { min = 0, max = 1, step = 0.01, onInput, tip } = o;
+  const range = h('input', { type: 'range', min, max, step });
+  const num = h('input', { type: 'number', step });
+  const sync = () => { const v = get(); range.value = v; num.value = +(+v).toFixed(4); };
+  sync();
+  const apply = (v) => { if (!isFinite(v)) return; set(v); sync(); onInput && onInput(v); };
+  range.addEventListener('input', () => apply(+range.value));
+  range.addEventListener('change', commit);
+  num.addEventListener('change', () => { apply(+num.value); commit(); });
+  const row = h('div', { class: 'row', title: tip || '' }, h('label', {}, label), range, num);
+  row.sync = sync;
+  return row;
+}
+function selectRow(label, options, get, set, onChange) {
+  const sel = h('select', { class: 'grow' });
+  for (const [v, t] of options) sel.append(h('option', { value: v }, t));
+  sel.value = get();
+  sel.addEventListener('change', () => { set(sel.value); onChange && onChange(); commit(); });
+  return h('div', { class: 'row' }, h('label', {}, label), sel);
+}
+function checkRow(label, get, set, onChange, tip) {
+  const cb = h('input', { type: 'checkbox' }); cb.checked = !!get();
+  cb.addEventListener('change', () => { set(cb.checked); onChange && onChange(); commit(); });
+  return h('div', { class: 'row', title: tip || '' }, h('label', {}, label), cb);
+}
+function segRow(label, options, get, set, onChange) {
+  const wrap = h('div', { class: 'seg' });
+  const btns = options.map(([v, t]) => {
+    const b = h('button', { onclick: () => { set(v); btns.forEach(x => x.classList.toggle('on', x._v === get())); onChange && onChange(); commit(); } }, t);
+    b._v = v; b.classList.toggle('on', v === get()); wrap.append(b); return b;
+  });
+  const row = h('div', { class: 'row' }, h('label', {}, label), wrap);
+  row.sync = () => btns.forEach(x => x.classList.toggle('on', x._v === get()));
+  return row;
+}
+function colorRow(label, get, set) {
+  const c = h('input', { type: 'color' }); c.value = get();
+  c.addEventListener('input', () => { set(c.value); requestRender(); });
+  c.addEventListener('change', commit);
+  return h('div', { class: 'row' }, h('label', {}, label), c);
+}
+
+/* Layer list */
+function buildLayerList() {
+  const list = $('layerList'); list.innerHTML = '';
+  if (!state.layers.length) { list.append(h('div', { class: 'empty' }, 'Drop black and white images here or add shapes')); return; }
+  for (let i = state.layers.length - 1; i >= 0; i--) {
+    const L = state.layers[i];
+    const eye = h('span', { class: 'eye' + (L.visible ? '' : ' off'), title: 'Toggle visibility', onclick: (e) => { e.stopPropagation(); L.visible = !L.visible; layersChanged(); commit(); } }, L.visible ? '◉' : '○');
+    const opLetter = L.op === 'subtract' ? 'S' : L.op === 'intersect' ? 'I' : 'U';
+    const op = h('span', { class: 'op op-' + L.op, title: L.op + ' (click to cycle)', onclick: (e) => { e.stopPropagation(); L.op = L.op === 'union' ? 'subtract' : L.op === 'subtract' ? 'intersect' : 'union'; layersChanged(); commit(); } }, opLetter);
+    const row = h('div', { class: 'lrow' + (L.id === state.selected ? ' sel' : ''), onclick: () => select(L.id) }, eye, op, h('span', { class: 'nm' }, L.name), h('span', { class: 'ty' }, TYPE_LABEL[L.type]));
+    list.append(row);
+  }
+}
+function select(id) {
+  state.selected = id; buildLayerList(); buildProps(); buildRefPanel(); requestRender();
+}
+
+/* Properties */
+let propRows = [];
+function onLayerEdit(L, imageParam) {
+  if (isRaster(L) && imageParam) scheduleImage(L);
+  requestRender(); scheduleVector();
+}
+function buildProps() {
+  const box = $('props'); box.innerHTML = ''; propRows = [];
+  const L = selectedLayer();
+  if (!L) { box.append(h('div', { class: 'note' }, 'Select a layer (click it in the list or on the canvas).')); return; }
+  const name = h('input', { type: 'text', class: 'grow', value: L.name });
+  name.addEventListener('input', () => { L.name = name.value; buildLayerListSoon(); });
+  name.addEventListener('change', commit);
+  box.append(h('div', { class: 'row' }, h('label', {}, 'Name'), name));
+  box.append(segRow('Operation', [['union', 'Union'], ['subtract', 'Subtract'], ['intersect', 'Intersect']], () => L.op, v => L.op = v, layersChanged));
+  const m = Math.max(state.doc.w, state.doc.h);
+  const add = (r) => { box.append(r); propRows.push(r); return r; };
+  add(sliderRow('Blend', () => L.k, v => L.k = v, { min: 0, max: Math.round(m * 0.4), step: 1, onInput: () => onLayerEdit(L), tip: 'Metaball blend radius (doc px) against everything below this layer' }));
+  box.append(segRow('Blend style', [['round', 'Round'], ['chamfer', 'Chamfer']], () => L.style || 'round', v => L.style = v, () => { buildProps(); onLayerEdit(L); }));
+  if ((L.style || 'round') === 'round') add(sliderRow('Profile', () => L.profile || 0, v => L.profile = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: '0 = soft SDF blend (can bulge or flatten), 1 = true circular arc tangent to both edges at any angle (rolling ball fillet)' }));
+  add(sliderRow('Contact only', () => L.contact || 0, v => L.contact = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: 'Less blend where surfaces face each other: no bridging between nearby shapes, blends only where they touch' }));
+  add(sliderRow('Grow / shrink', () => L.grow, v => L.grow = v, { min: -Math.round(m * 0.1), max: Math.round(m * 0.1), step: 0.5, onInput: () => onLayerEdit(L), tip: 'Offset the surface (doc px)' }));
+  if (L.type === 'text') buildTextProps(box, L, add);
+  else if (L.type === 'image') {
+    const a = assets.get(L.asset);
+    box.append(h('div', { class: 'note' }, a ? `${a.name}  ${a.w}x${a.h}${a.hasAlpha ? '  (alpha)' : ''}` : 'Missing image'));
+    box.append(segRow('Field', [['sdf', 'SDF (EDT)'], ['blur', 'Blur + Level']], () => L.mode, v => L.mode = v, () => { buildProps(); onLayerEdit(L, true); }));
+    box.append(checkRow('Invert', () => L.invert, v => L.invert = v, () => onLayerEdit(L, true), 'Shape = white by default; invert for dark shapes'));
+    box.append(selectRow('Resolution', [[512, '512'], [1024, '1024'], [2048, '2048'], [4096, '4096']], () => L.res, v => L.res = +v, () => onLayerEdit(L, true)));
+    if (L.mode === 'sdf') {
+      box.append(checkRow('Auto threshold', () => L.autoThr, v => { L.autoThr = v; if (!v && L._otsu) L.thr = +L._otsu.toFixed(3); }, () => { buildProps(); onLayerEdit(L, true); }, 'Otsu threshold'));
+      if (!L.autoThr) add(sliderRow('Threshold', () => L.thr, v => L.thr = v, { min: 0.01, max: 0.99, step: 0.01, onInput: () => onLayerEdit(L, true) }));
+      add(sliderRow('Smooth', () => L.smooth, v => L.smooth = v, { min: 0, max: 20, step: 0.1, onInput: () => onLayerEdit(L, true), tip: 'Gaussian on the distance field (image px), removes pixel steps' }));
+    } else {
+      add(sliderRow('Blur', () => L.blur, v => L.blur = v, { min: 0.5, max: 100, step: 0.5, onInput: () => onLayerEdit(L, true), tip: 'Gaussian blur sigma (image px)' }));
+      add(sliderRow('Level', () => L.level, v => L.level = v, { min: 0.01, max: 0.99, step: 0.01, onInput: () => onLayerEdit(L, true), tip: 'Levels cut point on the blurred image' }));
+    }
+  } else {
+    for (const [key, label, mn, mx, st] of SHAPE_PARAMS[L.type]) add(sliderRow(label, () => L[key], v => L[key] = v, { min: mn, max: mx, step: st, onInput: () => onLayerEdit(L) }));
+  }
+  add(sliderRow('X', () => L.x, v => L.x = v, { min: -state.doc.w * 0.5, max: state.doc.w * 1.5, step: 1, onInput: () => onLayerEdit(L) }));
+  add(sliderRow('Y', () => L.y, v => L.y = v, { min: -state.doc.h * 0.5, max: state.doc.h * 1.5, step: 1, onInput: () => onLayerEdit(L) }));
+  add(sliderRow('Scale', () => L.scale, v => L.scale = Math.max(0.001, v), { min: 0.01, max: L.type === 'image' ? 5 : 5, step: 0.001, onInput: () => onLayerEdit(L) }));
+  add(sliderRow('Rotation', () => L.rot, v => L.rot = v, { min: -180, max: 180, step: 0.5, onInput: () => onLayerEdit(L) }));
+}
+let llTimer = null;
+function buildLayerListSoon() { clearTimeout(llTimer); llTimer = setTimeout(buildLayerList, 150); }
+function syncProps() { for (const r of propRows) r.sync && r.sync(); }
+
+/* Reference panel */
+function buildRefPanel() {
+  const r = state.ref, a = r.asset && assets.get(r.asset);
+  const drop = $('refDrop'); drop.innerHTML = '';
+  if (a) drop.append(h('img', { src: a.dataURL }), h('span', {}, a.name));
+  else drop.append('Drop a reference image here');
+  const box = $('refCtl'); box.innerHTML = '';
+  box.append(h('div', { class: 'rowbtns' },
+    h('button', { onclick: () => $('fileRef').click() }, a ? 'Replace' : 'Load'),
+    h('button', { onclick: () => { r.asset = null; buildRefPanel(); requestRender(); commit(); }, disabled: !a }, 'Clear'),
+    h('button', { onclick: () => { if (a) { setReferenceAsset(r.asset, true); commit(); } }, disabled: !a, title: 'Fit to document' }, 'Fit'),
+    h('button', { class: state.selected === '__ref' ? 'on' : '', onclick: () => select(state.selected === '__ref' ? null : '__ref'), disabled: !a, title: 'Select to edit / drag' }, 'Select')));
+  if (!a) return;
+  box.append(sliderRow('Opacity', () => r.opacity, v => r.opacity = v, { min: 0, max: 1, step: 0.01, onInput: requestRender }));
+  box.append(checkRow('Visible', () => r.visible, v => r.visible = v, requestRender));
+  box.append(checkRow('Locked', () => r.locked, v => r.locked = v, requestRender, 'Unlock to drag it on the canvas (select it first)'));
+  refRows = [
+    sliderRow('Scale', () => r.scale, v => r.scale = Math.max(0.001, v), { min: 0.01, max: 5, step: 0.001, onInput: requestRender }),
+    sliderRow('X', () => r.x, v => r.x = v, { min: -state.doc.w, max: state.doc.w * 2, step: 1, onInput: requestRender }),
+    sliderRow('Y', () => r.y, v => r.y = v, { min: -state.doc.h, max: state.doc.h * 2, step: 1, onInput: requestRender }),
+  ];
+  refRows.forEach(x => box.append(x));
+}
+let refRows = [];
+
+/* Preview / doc / export panels */
+let previewModeRow = null, vectorRow = null;
+function buildPreviewPanel() {
+  const box = $('previewCtl'), p = state.preview; box.innerHTML = '';
+  previewModeRow = segRow('Mode', [[0, 'Fill'], [1, 'Outline'], [2, 'Field']], () => p.mode, v => p.mode = v, requestRender);
+  box.append(previewModeRow);
+  box.append(sliderRow('Shape opacity', () => p.fillA, v => p.fillA = v, { min: 0, max: 1, step: 0.01, onInput: requestRender }));
+  vectorRow = checkRow('Vector overlay', () => p.vector, v => p.vector = v, scheduleVector, 'Live Bezier curves, same code as the SVG export');
+  box.append(vectorRow);
+  box.append(checkRow('Show nodes', () => p.nodes, v => p.nodes = v, scheduleVector, 'White = smooth node, orange = corner'));
+  box.append(checkRow('Show handles', () => p.handles, v => p.handles = v, scheduleVector, 'Bezier control handles'));
+}
+function buildDocPanel() {
+  const box = $('docCtl'), d = state.doc; box.innerHTML = '';
+  const wIn = h('input', { type: 'number', value: d.w, min: 16, max: 8192, step: 1 });
+  const hIn = h('input', { type: 'number', value: d.h, min: 16, max: 8192, step: 1 });
+  const applySize = () => { d.w = clamp(Math.round(+wIn.value) || d.w, 16, 8192); d.h = clamp(Math.round(+hIn.value) || d.h, 16, 8192); fitView(); scheduleVector(); buildProps(); commit(); };
+  wIn.addEventListener('change', applySize); hIn.addEventListener('change', applySize);
+  box.append(h('div', { class: 'row' }, h('label', {}, 'Size'), wIn, h('span', {}, 'x'), hIn));
+  box.append(sliderRow('Iso offset', () => d.iso, v => d.iso = v, { min: -100, max: 100, step: 0.5, onInput: () => { requestRender(); scheduleVector(); }, tip: 'Global offset of the surface (negative = fatter)' }));
+  box.append(colorRow('Shape color', () => d.fg, v => d.fg = v));
+  box.append(colorRow('Background', () => d.bg, v => d.bg = v));
+}
+function buildCurvePanel() {
+  const box = $('curveCtl'), e = state.export; box.innerHTML = '';
+  const live = () => { requestRender(); scheduleVector(); };
+  box.append(selectRow('Resolution', [[1, '1x (fast)'], [2, '2x'], [4, '4x (fine)']], () => e.quality, v => e.quality = +v, live));
+  box.append(sliderRow('Tolerance', () => e.tol, v => e.tol = v, { min: 0.05, max: 4, step: 0.05, onInput: live, tip: 'Max distance (doc px) the Bezier curves may drift from the SDF shape. Higher = fewer nodes, but small blend changes disappear' }));
+  box.append(sliderRow('Corner angle', () => e.corner, v => e.corner = v, { min: 20, max: 180, step: 1, onInput: live, tip: 'Turns sharper than this stay as corners. 180 = all smooth' }));
+  box.append(sliderRow('Min area', () => e.minArea, v => e.minArea = v, { min: 0, max: 500, step: 1, onInput: live, tip: 'Drop specks smaller than this (doc px squared)' }));
+  box.append(h('div', { class: 'note' }, 'Curve fitting only. Keep Tolerance low (0.2 to 0.5) so the curves follow the blend settings above.'));
+}
+function buildExportPanel() {
+  buildCurvePanel();
+  const box = $('exportCtl'), e = state.export; box.innerHTML = '';
+  const live = () => { requestRender(); scheduleVector(); };
+  box.append(sliderRow('Rings', () => e.rings, v => e.rings = Math.round(v), { min: 0, max: 64, step: 1, onInput: live, tip: 'Extra offset contours exported as strokes' }));
+  box.append(sliderRow('Ring step', () => e.ringStep, v => e.ringStep = v, { min: -100, max: 100, step: 0.5, onInput: live, tip: 'Distance between rings (negative = inward)' }));
+  box.append(sliderRow('Ring stroke', () => e.ringStroke, v => e.ringStroke = v, { min: 0.1, max: 20, step: 0.1 }));
+  box.append(colorRow('SVG color', () => e.svgColor, v => e.svgColor = v));
+  box.append(checkRow('SVG bg rect', () => e.includeBg, v => e.includeBg = v));
+  box.append(checkRow('PNG alpha', () => e.pngTransparent, v => e.pngTransparent = v));
+}
+
+/* ============================================================================
+   Pointer interaction
+   ========================================================================== */
+let dragging = null, spaceDown = false;
+function evtDoc(e) {
+  const r = glCanvas.getBoundingClientRect();
+  const sx = (e.clientX - r.left) * dpr, sy = (e.clientY - r.top) * dpr;
+  return { sx, sy, x: (sx - view.ox) / view.s, y: (sy - view.oy) / view.s };
+}
+function hitTest(x, y) {
+  const tolDoc = 4 * dpr / view.s;
+  for (let i = state.layers.length - 1; i >= 0; i--) {
+    const L = state.layers[i];
+    if (!L.visible) continue;
+    if (layerDist(L, x, y) < tolDoc) return L;
+  }
+  return null;
+}
+viewportEl.addEventListener('pointerdown', (e) => {
+  viewportEl.setPointerCapture(e.pointerId);
+  const p = evtDoc(e);
+  if (e.button === 1 || (e.button === 0 && spaceDown)) { dragging = { kind: 'pan', sx: p.sx, sy: p.sy, ox: view.ox, oy: view.oy }; e.preventDefault(); return; }
+  if (e.button !== 0) return;
+  const L = selectedLayer();
+  if (L) {
+    const g = gizmoHandles(L), R = 8 * dpr;
+    if (Math.hypot(p.sx - g.rot[0], p.sy - g.rot[1]) < R) {
+      const [cx, cy] = docToScreen(L.x, L.y);
+      dragging = { kind: 'rot', L, a0: Math.atan2(p.sy - cy, p.sx - cx), r0: L.rot };
+      return;
+    }
+    for (const c of g.corners) if (Math.hypot(p.sx - c[0], p.sy - c[1]) < R) {
+      const [cx, cy] = docToScreen(L.x, L.y);
+      dragging = { kind: 'scale', L, d0: Math.hypot(p.sx - cx, p.sy - cy) || 1, s0: L.scale };
+      return;
+    }
+  }
+  const hit = hitTest(p.x, p.y);
+  let target = hit;
+  if (!target && L && pointInLayerBox(L, p.x, p.y)) target = L;
+  if (target) {
+    if (target.id !== state.selected) select(target.id);
+    dragging = { kind: 'move', L: target, x0: p.x, y0: p.y, lx: target.x, ly: target.y };
+    return;
+  }
+  const r = state.ref, a = r.asset && assets.get(r.asset);
+  if (a && !r.locked && r.visible && Math.abs(p.x - r.x) <= a.w * r.scale / 2 && Math.abs(p.y - r.y) <= a.h * r.scale / 2) {
+    if (state.selected !== '__ref') select('__ref');
+    dragging = { kind: 'ref', x0: p.x, y0: p.y, lx: r.x, ly: r.y };
+    return;
+  }
+  if (state.selected) select(null);
+  dragging = { kind: 'pan', sx: p.sx, sy: p.sy, ox: view.ox, oy: view.oy };
+});
+viewportEl.addEventListener('pointermove', (e) => {
+  const p = evtDoc(e);
+  if (!dragging) {
+    const L = selectedLayer(); let cur = spaceDown ? 'grab' : 'default';
+    if (L) {
+      const g = gizmoHandles(L), R = 8 * dpr;
+      if (Math.hypot(p.sx - g.rot[0], p.sy - g.rot[1]) < R) cur = 'alias';
+      else if (g.corners.some(c => Math.hypot(p.sx - c[0], p.sy - c[1]) < R)) cur = 'nwse-resize';
+      else if (hitTest(p.x, p.y) || pointInLayerBox(L, p.x, p.y)) cur = 'move';
+    } else if (hitTest(p.x, p.y)) cur = 'pointer';
+    viewportEl.style.cursor = cur;
+    return;
+  }
+  const D = dragging;
+  if (D.kind === 'pan') { view.ox = D.ox + (p.sx - D.sx); view.oy = D.oy + (p.sy - D.sy); requestRender(); return; }
+  if (D.kind === 'move') { D.L.x = Math.round((D.lx + p.x - D.x0) * 100) / 100; D.L.y = Math.round((D.ly + p.y - D.y0) * 100) / 100; }
+  else if (D.kind === 'scale') { const [cx, cy] = docToScreen(D.L.x, D.L.y); D.L.scale = Math.max(0.001, +(D.s0 * Math.hypot(p.sx - cx, p.sy - cy) / D.d0).toFixed(4)); }
+  else if (D.kind === 'rot') {
+    const [cx, cy] = docToScreen(D.L.x, D.L.y);
+    let r = D.r0 + (Math.atan2(p.sy - cy, p.sx - cx) - D.a0) * 180 / Math.PI;
+    r = ((r + 180) % 360 + 360) % 360 - 180;
+    if (e.shiftKey) r = Math.round(r / 15) * 15;
+    D.L.rot = +r.toFixed(2);
+  } else if (D.kind === 'ref') { state.ref.x = D.lx + p.x - D.x0; state.ref.y = D.ly + p.y - D.y0; refRows.forEach(x => x.sync()); requestRender(); return; }
+  syncProps(); requestRender(); scheduleVector();
+});
+const endDrag = () => { if (dragging && dragging.kind !== 'pan') { dragging = null; commit(); scheduleVector(); } dragging = null; };
+viewportEl.addEventListener('pointerup', endDrag);
+viewportEl.addEventListener('pointercancel', endDrag);
+viewportEl.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const p = evtDoc(e);
+  const f = Math.exp(-e.deltaY * 0.0015);
+  const ns = clamp(view.s * f, 0.02, 64);
+  view.ox = p.sx - p.x * ns; view.oy = p.sy - p.y * ns; view.s = ns;
+  requestRender();
+}, { passive: false });
+viewportEl.addEventListener('contextmenu', e => e.preventDefault());
+
+/* Keyboard */
+function typingTarget(e) { const t = e.target; return t && (t.tagName === 'INPUT' && t.type !== 'checkbox' && t.type !== 'range' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA'); }
+window.addEventListener('keydown', (e) => {
+  if (typingTarget(e)) return;
+  const L = selectedLayer();
+  const k = e.key.toLowerCase();
+  if (e.key === ' ') { spaceDown = true; viewportEl.style.cursor = 'grab'; e.preventDefault(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redo(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveProject(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); duplicate(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { if (L) { removeLayer(); e.preventDefault(); } return; }
+  if (k === 'f') { fitView(); return; }
+  if (k === '1' || k === '2' || k === '3') { state.preview.mode = +k - 1; previewModeRow.sync(); requestRender(); return; }
+  if (k === 'v') { state.preview.vector = !state.preview.vector; buildPreviewPanel(); scheduleVector(); return; }
+  if (k === 'escape') { select(null); return; }
+  if (L && e.key.startsWith('Arrow')) {
+    const st = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowLeft') L.x -= st; if (e.key === 'ArrowRight') L.x += st;
+    if (e.key === 'ArrowUp') L.y -= st; if (e.key === 'ArrowDown') L.y += st;
+    e.preventDefault(); syncProps(); requestRender(); scheduleVector(); clearTimeout(nudgeTimer); nudgeTimer = setTimeout(commit, 300);
+  }
+});
+let nudgeTimer = null;
+window.addEventListener('keyup', (e) => { if (e.key === ' ') { spaceDown = false; viewportEl.style.cursor = 'default'; } });
+
+/* Layer buttons */
+function moveLayer(dir) {
+  const i = state.layers.findIndex(l => l.id === state.selected); if (i < 0) return;
+  const j = i + dir; if (j < 0 || j >= state.layers.length) return;
+  [state.layers[i], state.layers[j]] = [state.layers[j], state.layers[i]];
+  layersChanged(); commit();
+}
+function duplicate() {
+  const L = selectedLayer(); if (!L) return;
+  const c = JSON.parse(JSON.stringify(L)); c.id = uid(); c.name = L.name + ' copy'; c.x += 20; c.y += 20;
+  addLayer(c);
+}
+function removeLayer() {
+  const i = state.layers.findIndex(l => l.id === state.selected); if (i < 0) return;
+  state.layers.splice(i, 1);
+  state.selected = state.layers.length ? state.layers[Math.min(i, state.layers.length - 1)].id : null;
+  layersChanged(); commit();
+}
+$('bUp').onclick = () => moveLayer(1);
+$('bDown').onclick = () => moveLayer(-1);
+$('bDup').onclick = duplicate;
+$('bDel').onclick = removeLayer;
+document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+  const t = b.dataset.add;
+  if (t === 'image') $('fileImg').click();
+  else if (t === 'text') addTextLayer();
+  else if (t === 'reference') { $('refPanel').scrollIntoView({ block: 'nearest' }); $('fileRef').click(); }
+  else addShape(t);
+});
+$('fileImg').onchange = (e) => { addImageFiles([...e.target.files]); e.target.value = ''; };
+$('fileRef').onchange = (e) => { if (e.target.files[0]) setReferenceFile(e.target.files[0]); e.target.value = ''; };
+$('fileProj').onchange = async (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { try { await loadProjectText(await f.text()); } catch (err) { setStatus(err.message); } } };
+$('bNew').onclick = newProject;
+$('bOpen').onclick = () => $('fileProj').click();
+$('bSave').onclick = saveProject;
+$('bUndo').onclick = undo;
+$('bRedo').onclick = redo;
+$('bSvg').onclick = exportSVG;
+$('bPng').onclick = exportPNG;
+const aboutEl = $('about');
+$('bAbout').onclick = () => { $('aboutVer').textContent = 'v' + APP_VERSION; aboutEl.hidden = false; };
+$('aboutClose').onclick = () => { aboutEl.hidden = true; };
+aboutEl.addEventListener('pointerdown', (e) => { if (e.target === aboutEl) aboutEl.hidden = true; });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !aboutEl.hidden) { aboutEl.hidden = true; e.stopImmediatePropagation(); } }, true);
+$('projName').addEventListener('input', () => { document.title = `${projectName()} | VectorMelt v${APP_VERSION}`; });
+
+/* Drag and drop */
+let dragDepth = 0;
+const dropMsg = $('dropMsg'), refDrop = $('refDrop');
+window.addEventListener('dragenter', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { dragDepth++; dropMsg.style.display = 'flex'; } });
+window.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) dropMsg.style.display = 'none'; });
+window.addEventListener('dragover', (e) => { e.preventDefault(); refDrop.classList.toggle('hot', refDrop.contains(e.target)); });
+window.addEventListener('drop', async (e) => {
+  e.preventDefault(); dragDepth = 0; dropMsg.style.display = 'none'; refDrop.classList.remove('hot');
+  const files = [...(e.dataTransfer?.files || [])];
+  if (!files.length) return;
+  const proj = files.find(f => /\.(vmelt|vsdf|json)$/i.test(f.name));
+  if (proj) { try { await loadProjectText(await proj.text()); } catch (err) { setStatus(err.message); } return; }
+  if (refDrop.contains(e.target)) { const f = files.find(f => f.type.startsWith('image/')); if (f) setReferenceFile(f); return; }
+  addImageFiles(files);
+});
+
+/* ============================================================================
+   Boot
+   ========================================================================== */
+state.ref.x = state.doc.w / 2; state.ref.y = state.doc.h / 2;
+buildPreviewPanel(); buildDocPanel(); buildExportPanel(); buildRefPanel(); buildLayerList(); buildProps();
+commit();
+new ResizeObserver(() => { resize(); requestRender(); }).observe(viewportEl);
+requestAnimationFrame(loop);
+setStatus(`VectorMelt v${APP_VERSION} ready. Drop black and white images or add shapes.`);
+
+// Console / test hook
+window.vmelt = window.vsdf = { contour, renderField, state, assets, imgCache, addShape, addImageAsset, loadAssetFromDataURL, setReferenceAsset, computeVector, buildSVG, buildPNGCanvas,
+  layersChanged, select, commit, undo, redo, fitView, renderFrame: () => { needsRender = true; renderFrame(); }, runVectorPreview, loadProjectText, view };
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+_local/
+Claude outputs/
+*.tmp
+.DS_Store
+Thumbs.db
