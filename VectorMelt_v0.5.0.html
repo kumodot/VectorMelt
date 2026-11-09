@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.4.0</title>
+<title>VectorMelt v0.5.0</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,14 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.5.0  Real SVG import (kept as a vector, rasterized at the layer Resolution, viewBox sizing,
+         SVG button + drag and drop). Exact fillets panel: Inner fillet / Outer round on the
+         final shape (rolling ball via exact distances, clean on text, images and SVG).
+         Rings now come from a re-distanced field (clean offsets inside and outside).
+         Blends normalize their inputs by gradient length; the Profile arc falls back to the
+         soft blend near ridges (inside corners of letters) instead of making spikes.
+         Canvas legend; the SDF edge in Outline mode is lavender, the exported vector is cyan.
+         Text / image / SVG layers start with Profile 0.
   0.4.0  Text layers: type text with Google Fonts or installed fonts (filter All / Google /
          Installed, search, any other font by name, Find installed fonts), weight, italic, align,
          letter spacing, line height, detail. Text goes through the same SDF pipeline as images.
@@ -108,6 +116,9 @@ h3 small{text-transform:none;letter-spacing:0;font-weight:400}
 #viewport{flex:1;position:relative;overflow:hidden;background:#101114}
 #viewport canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #hint{position:absolute;left:10px;bottom:8px;color:#7b808a;font-size:11px;pointer-events:none;text-shadow:0 1px 2px #000}
+#legend{position:absolute;right:10px;bottom:30px;background:rgba(16,17,20,.82);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:11px;color:#c9ccd2;pointer-events:none;display:none;line-height:1.7}
+#legend .sw{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:6px}
+#legend .sq{display:inline-block;width:7px;height:7px;vertical-align:middle;margin:0 9px 0 5px}
 #dropMsg{position:absolute;inset:12px;border:2px dashed var(--accent);border-radius:10px;display:none;align-items:center;justify-content:center;font-size:16px;color:var(--accent);background:rgba(16,30,45,.55);pointer-events:none}
 
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50}
@@ -148,7 +159,8 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
     <section>
       <h3>Add</h3>
       <div class="addgrid">
-        <button data-add="image" title="Black and white image (or drop files on the canvas)">Image</button>
+        <button data-add="image" title="Black and white image or SVG (or drop files on the canvas)">Image</button>
+        <button data-add="svg" title="SVG file, kept as a vector and rasterized at the layer Resolution">SVG</button>
         <button data-add="circle">Circle</button>
         <button data-add="ellipse">Ellipse</button>
         <button data-add="box">Box</button>
@@ -179,12 +191,14 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
     <canvas id="gl"></canvas>
     <canvas id="ov"></canvas>
     <div id="hint">Drag: move | Corners: scale | Top dot: rotate (Shift snaps) | Wheel: zoom | Middle or Space drag: pan | F: fit | 1/2/3: preview mode | V: vector overlay</div>
+    <div id="legend"></div>
     <div id="dropMsg">Drop images to add layers (.vmelt to open a project)</div>
   </div>
   <aside id="right">
     <section><h3>Layer</h3><div id="props"></div></section>
     <section><h3>Preview</h3><div id="previewCtl"></div></section>
     <section><h3>Curves <small>overlay and export</small></h3><div id="curveCtl"></div></section>
+    <section><h3>Exact fillets <small>final shape</small></h3><div id="filletCtl"></div></section>
     <section><h3>Document</h3><div id="docCtl"></div></section>
     <section><h3>Export</h3><div id="exportCtl"></div></section>
   </aside>
@@ -210,13 +224,13 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
     <div style="text-align:right"><button id="aboutClose">Close</button></div>
   </div>
 </div>
-<input type="file" id="fileImg" accept="image/*" multiple hidden>
+<input type="file" id="fileImg" accept="image/*,.svg" multiple hidden>
 <input type="file" id="fileRef" accept="image/*" hidden>
 <input type="file" id="fileProj" accept=".vmelt,.vsdf,.json,application/json" hidden>
 
 <script>
 'use strict';
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -226,9 +240,9 @@ console.log(`${APP_NAME} v${APP_VERSION}`);
    State
    ========================================================================== */
 const state = {
-  doc: { w: 1024, h: 1024, iso: 0, bg: '#141518', fg: '#f2f0ea' },
+  doc: { w: 1024, h: 1024, iso: 0, bg: '#141518', fg: '#f2f0ea', fillet: 0, roundR: 0 },
   preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false },
-  export: { quality: 2, tol: 0.35, corner: 45, minArea: 4, rings: 0, ringStep: 12, ringStroke: 1, includeBg: false, pngTransparent: true, svgColor: '#000000' },
+  export: { quality: 2, tol: 0.35, corner: 45, minArea: 4, rings: 0, ringStep: 12, ringDir: 'out', ringsInSvg: true, ringStroke: 1, includeBg: false, pngTransparent: true, svgColor: '#000000' },
   ref: { asset: null, opacity: 0.5, visible: true, locked: true, x: 512, y: 512, scale: 1 },
   layers: [],
   selected: null,
@@ -306,7 +320,17 @@ float arcCore(float a, float b, float r, float c0){
   return mix(arc, m, smoothstep(0.7, 0.95, c0));
 }
 float polyU(float a, float b, float k){ float h = max(k - abs(a - b), 0.0)/k; return min(a, b) - h*h*k*0.25; }
-vec3 blend3(vec3 a, vec3 b, float k, vec4 B){
+// Blended fields are no longer true distances: where they got steeper than a distance (gradient
+// length > 1) the next blend would read radii too small. Divide by the gradient length there.
+// Gradients shorter than 1 are left alone: they mark ridges (medial axes) where the finite
+// difference straddles two sides, and dividing would blow the values up.
+float gradLen(vec3 a){ return length(vec2(a.y - a.x, a.z - a.x))/uGradE; }
+vec3 normDist(vec3 a){
+  float g = gradLen(a);
+  return g > 1.0 ? a/min(g, 4.0) : a;
+}
+vec3 blend3(vec3 a0, vec3 b0, float k, vec4 B){
+  vec3 a = normDist(a0), b = normDist(b0);
   float ke = contactK(a, b, k, B.z);
   if(ke <= 0.0) return min(a, b);
   float r = ke*0.6;
@@ -317,7 +341,11 @@ vec3 blend3(vec3 a, vec3 b, float k, vec4 B){
   float la = length(ga), lb = length(gb);
   float c = (la > 1e-6 && lb > 1e-6) ? clamp(dot(ga, gb)/(la*lb), -1.0, 1.0) : 0.0;
   vec3 arc = vec3(arcCore(a.x, b.x, r, c), arcCore(a.y, b.y, r, c), arcCore(a.z, b.z, r, c));
-  return mix(soft, arc, B.y);
+  // The arc needs a trustworthy edge direction. Near a ridge of either field (inside corners of a
+  // letter, gaps between two parts of one shape) the direction flips from one sample to the next
+  // and the arc would jump, so fall back to the soft blend there.
+  float trust = smoothstep(0.55, 0.9, min(la, lb)/uGradE);
+  return mix(soft, arc, B.y*trust);
 }
 float sdCircle(vec2 p, float r){ return length(p) - r; }
 float sdEllipse(vec2 p, vec2 r){
@@ -379,7 +407,7 @@ function visibleLayers() {
   const out = []; let tex = 0;
   for (const L of state.layers) {
     if (!L.visible) continue;
-    if (isRaster(L)) { if (tex >= MAX_UNITS - 1) continue; out.push({ L, tex: tex++ }); }
+    if (isRaster(L)) { if (tex >= MAX_UNITS - 3) continue; out.push({ L, tex: tex++ }); }
     else out.push({ L, tex: -1 });
   }
   return out;
@@ -421,6 +449,8 @@ uniform vec2 uRes; uniform vec3 uView; uniform vec2 uDoc; uniform float uIso; un
 uniform vec3 uBg; uniform vec3 uFg; uniform float uFillA; uniform float uBand;
 uniform sampler2D uRef; uniform int uRefOn; uniform float uRefA; uniform vec3 uRefT; uniform vec2 uRefSize;
 uniform int uRings; uniform float uRingStep; uniform float uGradE;
+uniform sampler2D uRingTex; uniform int uRingOn; uniform float uRingQ; uniform int uRingDir;
+uniform sampler2D uShapeTex; uniform int uShapeOn; uniform float uShapeQ;
 ${decl}
 ${GLSL_LIB}
 ${fns}
@@ -429,6 +459,17 @@ void main(){
   vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
   vec2 p = (frag - uView.xy)/uView.z;
   float d = field(p) - uIso;
+  if(uShapeOn == 1 && uMode < 10){
+    // exact fillet result from the last vector pass
+    vec2 gp = p*uShapeQ - 0.5;
+    vec2 sz = vec2(textureSize(uShapeTex, 0));
+    if(gp.x >= 0.0 && gp.y >= 0.0 && gp.x <= sz.x - 1.0 && gp.y <= sz.y - 1.0){
+      ivec2 i0 = ivec2(floor(gp)); vec2 f = gp - vec2(i0); ivec2 mx = ivec2(sz) - 1;
+      float s00 = texelFetch(uShapeTex, i0, 0).r, s10 = texelFetch(uShapeTex, min(i0 + ivec2(1, 0), mx), 0).r;
+      float s01 = texelFetch(uShapeTex, min(i0 + ivec2(0, 1), mx), 0).r, s11 = texelFetch(uShapeTex, min(i0 + ivec2(1, 1), mx), 0).r;
+      d = mix(mix(s00, s10, f.x), mix(s01, s11, f.x), f.y)/uShapeQ;
+    }
+  }
   float px = 1.0/uView.z;
   if(uMode == 10){
     float v = clamp(d*uView.z/4096.0 + 0.5, 0.0, 1.0);
@@ -448,7 +489,7 @@ void main(){
       col = mix(col, r.rgb, r.a*uRefA*(inDoc ? 1.0 : 0.3));
     }
   }
-  vec3 lineC = vec3(0.31, 0.70, 1.0);
+  vec3 lineC = vec3(0.86, 0.80, 0.98);   // SDF edge in Outline mode (lavender, the vector overlay is cyan)
   if(uMode == 0){
     float a = clamp(0.5 - d/px, 0.0, 1.0);
     col = mix(col, uFg, a*uFillA);
@@ -463,10 +504,22 @@ void main(){
     fc = mix(fc, vec3(1.0), clamp(1.5 - abs(d)/px, 0.0, 1.0));
     col = mix(col, fc, uFillA);
   }
-  for(int i = 1; i <= 64; i++){
-    if(i > uRings) break;
-    float lv = float(i)*uRingStep;
-    col = mix(col, vec3(0.95, 0.45, 0.2), 0.85*clamp(1.0 - abs(d - lv)/px, 0.0, 1.0));
+  if(uRingOn == 1 && uRings > 0){
+    // rings come from the re-distanced field of the last vector pass (true offsets)
+    vec2 gp = p*uRingQ - 0.5;
+    vec2 sz = vec2(textureSize(uRingTex, 0));
+    if(gp.x >= 0.0 && gp.y >= 0.0 && gp.x <= sz.x - 1.0 && gp.y <= sz.y - 1.0){
+      ivec2 i0 = ivec2(floor(gp)); vec2 f = gp - vec2(i0); ivec2 mx = ivec2(sz) - 1;
+      float r00 = texelFetch(uRingTex, i0, 0).r, r10 = texelFetch(uRingTex, min(i0 + ivec2(1, 0), mx), 0).r;
+      float r01 = texelFetch(uRingTex, min(i0 + ivec2(0, 1), mx), 0).r, r11 = texelFetch(uRingTex, min(i0 + ivec2(1, 1), mx), 0).r;
+      float rd = mix(mix(r00, r10, f.x), mix(r01, r11, f.x), f.y)/uRingQ;
+      for(int i = 1; i <= 64; i++){
+        if(i > uRings) break;
+        float lv = float(i)*uRingStep;
+        if(uRingDir != 1) col = mix(col, vec3(1.0, 0.62, 0.25), 0.55*clamp(1.0 - abs(rd - lv)/px, 0.0, 1.0));
+        if(uRingDir != 0) col = mix(col, vec3(1.0, 0.62, 0.25), 0.55*clamp(1.0 - abs(rd + lv)/px, 0.0, 1.0));
+      }
+    }
   }
   if(!inDoc) col *= 0.8;
   o = vec4(col, 1.0);
@@ -547,8 +600,21 @@ function setCommonUniforms(resW, resH, view, mode) {
   gl.uniform1f(U.uFillA, pv.fillA);
   gl.uniform1f(U.uBand, Math.max(d.w, d.h) / 48);
   gl.uniform1i(U.uRings, mode < 10 ? ex.rings : 0);
-  gl.uniform1f(U.uRingStep, ex.ringStep);
+  gl.uniform1f(U.uRingStep, Math.abs(ex.ringStep || 0));
+  { const dir = ex.ringDir || (ex.ringStep < 0 ? 'in' : 'out'); if (U.uRingDir) gl.uniform1i(U.uRingDir, dir === 'in' ? 1 : dir === 'both' ? 2 : 0); }
   if (U.uGradE) gl.uniform1f(U.uGradE, gradStep(progVis));
+  {
+    const unit = MAX_UNITS - 1;
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    const on = mode < 10 && ringInfo && ringTex;
+    gl.bindTexture(gl.TEXTURE_2D, on ? ringTex : dummySDF);
+    gl.uniform1i(U.uRingTex, unit); gl.uniform1i(U.uRingOn, on ? 1 : 0); gl.uniform1f(U.uRingQ, on ? ringInfo.q : 1);
+    const su = MAX_UNITS - 2, son = mode < 10 && shapeInfo && shapeTex && shapeProcActive();
+    gl.activeTexture(gl.TEXTURE0 + su);
+    gl.bindTexture(gl.TEXTURE_2D, son ? shapeTex : dummySDF);
+    gl.uniform1i(U.uShapeTex, su); gl.uniform1i(U.uShapeOn, son ? 1 : 0); gl.uniform1f(U.uShapeQ, son ? shapeInfo.q : 1);
+    gl.activeTexture(gl.TEXTURE0);
+  }
   // reference
   const r = state.ref, ra = r.asset && assets.get(r.asset);
   gl.activeTexture(gl.TEXTURE0);
@@ -607,6 +673,21 @@ function fitView() {
 }
 function requestRender() { needsRender = true; }
 
+// Re-distanced field of the last vector pass, used to draw the rings in the preview.
+let ringTex = null, ringInfo = null;
+let shapeTex = null, shapeInfo = null;
+function updateRingTex(res) {
+  if (res && res.shapeGrid) {
+    if (shapeTex) gl.deleteTexture(shapeTex);
+    shapeTex = makeTex(gl.R32F, res.W, res.H, gl.RED, gl.FLOAT, res.shapeGrid, gl.NEAREST);
+    shapeInfo = { q: res.q };
+  } else shapeInfo = null;
+  if (!res || !res.ringGrid) { ringInfo = null; requestRender(); return; }
+  if (ringTex) gl.deleteTexture(ringTex);
+  ringTex = makeTex(gl.R32F, res.W, res.H, gl.RED, gl.FLOAT, res.ringGrid, gl.NEAREST);
+  ringInfo = { W: res.W, H: res.H, q: res.q };
+  requestRender();
+}
 function renderFrame() {
   if (!needsRender) return;
   needsRender = false;
@@ -871,7 +952,7 @@ function isRaster(L) { return L.type === 'image' || L.type === 'text'; }
 function addTextLayer() {
   const [x, y] = viewCenterDoc(), d = state.doc, m = Math.min(d.w, d.h);
   const L = {
-    id: uid(), type: 'text', name: nextName('text'), visible: true, op: 'union', k: Math.round(m * 0.02), style: 'round', profile: 0.6, contact: 0,
+    id: uid(), type: 'text', name: nextName('text'), visible: true, op: 'union', k: Math.round(m * 0.02), style: 'round', profile: 0, contact: 0,
     grow: 0, x, y, scale: 1, rot: 0,
     text: 'Melt', source: 'google', font: 'Fredoka', weight: 600, italic: false, spacing: 0, lineHeight: 1.1, align: 'center', detail: 512,
     res: 4096, mode: 'sdf', invert: false, autoThr: false, thr: 0.5, smooth: 1.2, blur: 6, level: 0.5,
@@ -946,7 +1027,8 @@ function processImage(L) {
   const old = imgCache.get(L.id);
   if (old && old.key === key) return old;
   const t0 = performance.now();
-  const sc = Math.min(1, L.res / Math.max(a.w, a.h));
+  // bitmaps are never upscaled; SVG is rasterized from the vector at exactly the layer Resolution
+  const sc = a.svg ? L.res / Math.max(a.w, a.h) : Math.min(1, L.res / Math.max(a.w, a.h));
   const w = Math.max(1, Math.round(a.w * sc)), h = Math.max(1, Math.round(a.h * sc));
   const blurTex = (L.mode === 'blur' ? L.blur : L.smooth) * sc;
   const P = 4 + Math.ceil(3 * blurTex);
@@ -1026,7 +1108,7 @@ function loadAssetFromDataURL(dataURL, name, key) {
       const hasAlpha = trans > tw * th * 0.01;
       const autoInvert = !hasAlpha && borderSum / borderN > 0.5;
       key = key || ('A' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
-      assets.set(key, { name, dataURL, img, w, h, hasAlpha, autoInvert });
+      assets.set(key, { name, dataURL, img, w, h, hasAlpha, autoInvert, svg: dataURL.startsWith('data:image/svg+xml') });
       res(key);
     };
     img.onerror = () => rej(new Error('Could not decode image ' + name));
@@ -1082,17 +1164,45 @@ async function addImageAsset(key) {
   const [x, y] = viewCenterDoc();
   const L = {
     id: uid(), type: 'image', name: a.name.replace(/\.[^.]+$/, '') || nextName('image'), visible: true, op: 'union',
-    k: Math.round(Math.min(d.w, d.h) * 0.02), style: 'round', profile: 0.6, contact: 0, grow: 0, x, y, scale: +scale.toFixed(4), rot: 0,
-    asset: key, res: 1024, mode: 'sdf', invert: a.autoInvert, autoThr: true, thr: 0.5, smooth: 1.0, blur: 8, level: 0.5,
+    k: Math.round(Math.min(d.w, d.h) * 0.02), style: 'round', profile: 0, contact: 0, grow: 0, x, y, scale: +scale.toFixed(4), rot: 0,
+    asset: key, res: a.svg ? 2048 : 1024, mode: 'sdf', invert: a.autoInvert, autoThr: true, thr: 0.5, smooth: 1.0, blur: 8, level: 0.5,
   };
   addLayer(L);
-  setStatus(`Image "${a.name}" ${a.w}x${a.h}${a.autoInvert ? ' (dark shape detected, inverted)' : ''}${a.hasAlpha ? ' (using alpha)' : ''}`);
+  setStatus(`${a.svg ? 'SVG' : 'Image'} "${a.name}" ${a.svg ? '(vector)' : a.w + 'x' + a.h}${a.autoInvert ? ' (dark shape detected, inverted)' : ''}${a.hasAlpha ? ' (using alpha)' : ''}`);
 }
+const isSvgFile = (f) => f.type === 'image/svg+xml' || /\.svg$/i.test(f.name);
+// SVG import: the file stays a vector. We make sure the root has a size (from the viewBox when
+// width/height are missing, long side normalized to 1024 units) so the browser can rasterize it
+// crisply at any size; the layer then rasterizes it at its own Resolution, never from pixels.
+function prepareSvgText(text) {
+  const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+  const svg = doc.documentElement;
+  if (!svg || svg.nodeName.toLowerCase() !== 'svg' || doc.getElementsByTagName('parsererror').length) throw new Error('Not a valid SVG file');
+  const num = (v) => { const m = /^\s*([\d.]+)\s*(px)?\s*$/.exec(v || ''); return m ? parseFloat(m[1]) : NaN; };
+  let w = num(svg.getAttribute('width')), h = num(svg.getAttribute('height'));
+  const vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+  if (vb.length === 4 && vb.every(isFinite) && vb[2] > 0 && vb[3] > 0) {
+    if (!(w > 0 && h > 0)) { w = vb[2]; h = vb[3]; }
+  } else {
+    if (!(w > 0 && h > 0)) { w = 1024; h = 1024; }
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  }
+  const k = 1024 / Math.max(w, h);
+  svg.setAttribute('width', +(w * k).toFixed(3)); svg.setAttribute('height', +(h * k).toFixed(3));
+  svg.setAttribute('preserveAspectRatio', 'none');
+  if (!svg.getAttribute('xmlns')) svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  return new XMLSerializer().serializeToString(doc);
+}
+function svgDataURL(text) { return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(text))); }
 async function addImageFiles(files) {
   for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    try { const key = await loadAssetFromDataURL(await readFileAsDataURL(f), f.name); await addImageAsset(key); }
-    catch (e) { setStatus(e.message); }
+    const svg = isSvgFile(f);
+    if (!svg && !f.type.startsWith('image/')) continue;
+    try {
+      const url = svg ? svgDataURL(prepareSvgText(await f.text())) : await readFileAsDataURL(f);
+      const key = await loadAssetFromDataURL(url, f.name);
+      await addImageAsset(key);
+    } catch (e) { setStatus(e.message); }
   }
 }
 async function setReferenceFile(f) {
@@ -1199,7 +1309,26 @@ function gizmoHandles(L) {
   const rot = [top[0] + Math.sin(th) * off, top[1] - Math.cos(th) * off];
   return { corners: cs, top, rot };
 }
+let legendKey = '';
+function updateLegend() {
+  const p = state.preview, items = [];
+  if (p.mode === 1) items.push(['line', '#dbccfa', 'SDF edge (live preview)']);
+  if (p.mode === 0) items.push(['line', state.doc.fg, 'Filled shape (live preview)']);
+  if (p.vector) items.push(['line', '#00e5ff', 'Vector curves (what Export SVG writes)']);
+  if (state.export.rings > 0) items.push(['line', '#ffb347', 'Rings (exported as strokes)']);
+  if (p.vector && (p.nodes || p.handles)) { items.push(['sq', '#ffffff', 'Smooth node']); items.push(['sq', '#ff9a3d', 'Corner node']); }
+  if (p.vector && p.handles) items.push(['line', 'rgba(255,255,255,0.5)', 'Bezier handles']);
+  if (shapeProcActive()) items.push(['note', '', 'Exact fillets on (preview from the last vector pass)']);
+  const key = JSON.stringify(items);
+  if (key === legendKey) return;
+  legendKey = key;
+  const el = $('legend');
+  el.style.display = items.length ? 'block' : 'none';
+  el.innerHTML = items.map(([t, c, label]) => t === 'note' ? `<div style="color:#8b9099">${label}</div>`
+    : `<div><span class="${t === 'sq' ? 'sq' : 'sw'}" style="${t === 'sq' ? 'background:' + c : 'border-color:' + c}"></span>${label}</div>`).join('');
+}
 function drawOverlay() {
+  updateLegend();
   const w = ovCanvas.width, h = ovCanvas.height;
   ov.setTransform(1, 0, 0, 1, 0, 0);
   ov.clearRect(0, 0, w, h);
@@ -1510,6 +1639,38 @@ function curvesToD(curves, map) {
   }
   return d + 'Z';
 }
+// Rebuild a true distance field from the final shape (its zero contour). Blends, and even a plain
+// union, leave the inside / outside values far from real distances, so offset rings taken straight
+// from the field come out noisy and deformed. Exact EDT on both sides + sub-pixel distances near
+// the surface from the field itself (value / gradient length). Units: grid px.
+function redistance(g, W, H) {
+  const N = W * H, fo = new Float64Array(N), fi = new Float64Array(N);
+  for (let i = 0; i < N; i++) { const inside = g[i] < 0; fo[i] = inside ? 0 : INF; fi[i] = inside ? INF : 0; }
+  edt2d(fo, W, H); edt2d(fi, W, H);
+  const out = new Float32Array(N);
+  for (let i = 0; i < N; i++) out[i] = fo[i] > 0 ? Math.min(Math.sqrt(fo[i]), 1e5) - 0.5 : -(Math.min(Math.sqrt(fi[i]), 1e5) - 0.5);
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x, v = g[i];
+    if (Math.abs(v) > 3) continue;
+    const gx = (g[i + 1] - g[i - 1]) * 0.5, gy = (g[i + W] - g[i - W]) * 0.5, m = Math.hypot(gx, gy);
+    if (m < 1e-3) continue;
+    const d = v / m;
+    if (Math.abs(d) < 1.5) out[i] = d;
+  }
+  return out;
+}
+// Exact fillets on the final shape: closing (Inner fillet) rounds every concave corner with a true
+// rolling ball, opening (Outer round) rounds every convex corner. Built from exact distances
+// (EDT), so it works on any input (text, images, SVG, already blended layers). Grid px units.
+function shapeProcActive() { return (state.doc.fillet || 0) > 0 || (state.doc.roundR || 0) > 0; }
+function finalGrid(F) {
+  const f = (state.doc.fillet || 0) * F.q, rr = (state.doc.roundR || 0) * F.q;
+  if (!(f > 0 || rr > 0)) return { G: F.g, exact: false };
+  let G = redistance(F.g, F.W, F.H);
+  if (f > 0) { G = redistance(G.map(v => v - f), F.W, F.H); for (let i = 0; i < G.length; i++) G[i] += f; }
+  if (rr > 0) { G = redistance(G.map(v => v + rr), F.W, F.H); for (let i = 0; i < G.length; i++) G[i] -= rr; }
+  return { G, exact: true };
+}
 function computeVector(q, opts = {}) {
   const t0 = performance.now();
   processAllImages();
@@ -1521,7 +1682,8 @@ function computeVector(q, opts = {}) {
   cornerWin = Math.max(2.5, 1.5 * q);
   let fillD = '', segs = 0, paths = 0;
   const nodes = [], handles = [];
-  for (const loop of contour(F.g, F.W, F.H, 0)) {
+  const FG = finalGrid(F);
+  for (const loop of contour(FG.G, F.W, F.H, 0)) {
     if (Math.abs(polyArea(loop)) < minA) continue;
     const curves = fitLoop(loop, tol, ex.corner);
     if (!curves || !curves.length) continue;
@@ -1535,22 +1697,38 @@ function computeVector(q, opts = {}) {
       }
     }
   }
-  let ringD = '', ringPaths = 0;
-  for (let r = 1; r <= ex.rings; r++) {
-    const lv = r * ex.ringStep * q;
-    if (Math.abs(lv) > 2000) break;
-    for (const loop of contour(F.g, F.W, F.H, lv)) {
+  let ringD = '', ringOutD = '', ringInD = '', ringPaths = 0, ringGrid = null;
+  const levels = ringLevels();
+  if (levels.length) ringGrid = FG.exact ? FG.G : redistance(FG.G, F.W, F.H);
+  for (const lvDoc of levels) {
+    const lv = lvDoc * q;
+    if (Math.abs(lv) > 2000) continue;
+    for (const loop of contour(ringGrid, F.W, F.H, lv)) {
       if (Math.abs(polyArea(loop)) < minA) continue;
       const curves = fitLoop(loop, tol, ex.corner);
       if (!curves || !curves.length) continue;
-      ringD += curvesToD(curves, map); segs += curves.length; ringPaths++;
+      const dd = curvesToD(curves, map);
+      ringD += dd; if (lvDoc > 0) ringOutD += dd; else ringInD += dd;
+      segs += curves.length; ringPaths++;
     }
   }
-  return { fillD, ringD, nodes, handles, paths, ringPaths, segs, ms: performance.now() - t0, W: F.W, H: F.H };
+  return { fillD, ringD, ringOutD, ringInD, nodes, handles, paths, ringPaths, segs, ms: performance.now() - t0, W: F.W, H: F.H, q, ringGrid, shapeGrid: FG.exact ? FG.G : null };
+}
+// Ring offsets in doc px: outside (+), inside (-) or both. Old projects stored a signed step.
+function ringLevels() {
+  const ex = state.export, n = ex.rings | 0, st = Math.abs(ex.ringStep || 0);
+  const dir = ex.ringDir || (ex.ringStep < 0 ? 'in' : 'out');
+  const out = [];
+  if (!n || !st) return out;
+  for (let i = 1; i <= n; i++) {
+    if (dir !== 'in') out.push(i * st);
+    if (dir !== 'out') out.push(-i * st);
+  }
+  return out;
 }
 let vecTimer = null, vecLast = 0;
 function scheduleVector() {
-  if (!state.preview.vector) { vectorResult = null; requestRender(); return; }
+  if (!state.preview.vector && !(state.export.rings > 0) && !shapeProcActive()) { vectorResult = null; updateRingTex(null); requestRender(); return; }
   clearTimeout(vecTimer);
   const wait = Math.max(0, 90 - (performance.now() - vecLast));
   vecTimer = setTimeout(runVectorPreview, dragging ? Math.max(wait, 60) : 60);
@@ -1559,9 +1737,10 @@ function runVectorPreview() {
   vecLast = performance.now();
   try {
     const d = state.doc;
-    const budget = dragging ? 600000 : 2500000;
+    const budget = dragging ? 600000 : (shapeProcActive() ? 1500000 : 2500000);
     const q = Math.min(state.export.quality, Math.sqrt(budget / (d.w * d.h)));
     vectorResult = computeVector(q, { nodes: state.preview.nodes || state.preview.handles, handles: state.preview.handles });
+    updateRingTex(vectorResult);
     setStatus(`Vector preview: ${vectorResult.paths} paths, ${vectorResult.ringPaths} rings, ${vectorResult.segs} curves, ${vectorResult.ms.toFixed(0)} ms`);
   } catch (e) { console.error(e); setStatus('Vector error: ' + e.message); }
   requestRender();
@@ -1586,7 +1765,10 @@ function buildSVG() {
   if (ex.includeBg) s += `<rect id="background" width="${d.w}" height="${d.h}" fill="${d.bg}"/>\n`;
   const col = ex.svgColor || d.fg;
   if (r.fillD) s += `<path id="shape" fill="${col}" fill-rule="evenodd" d="${r.fillD}"/>\n`;
-  if (r.ringD) s += `<path id="rings" fill="none" stroke="${col}" stroke-width="${ex.ringStroke}" stroke-linejoin="round" d="${r.ringD}"/>\n`;
+  if (ex.ringsInSvg !== false) {
+    const ring = (id, dd) => dd ? `<path id="${id}" fill="none" stroke="${col}" stroke-width="${ex.ringStroke}" stroke-linejoin="round" d="${dd}"/>\n` : '';
+    s += ring('rings-outside', r.ringOutD) + ring('rings-inside', r.ringInD);
+  }
   s += `</svg>\n`;
   return { svg: s, stats: r };
 }
@@ -1601,10 +1783,21 @@ function buildPNGCanvas() {
   processAllImages();
   const d = state.doc, q = Math.min(state.export.quality, Math.min(MAX_TEX, 8192) / Math.max(d.w, d.h));
   const W = Math.round(d.w * q), H = Math.round(d.h * q);
-  const px = renderOffscreen(W, H, { ox: 0, oy: 0, s: q }, state.export.pngTransparent ? 11 : 12);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const ctx = c.getContext('2d'), img = ctx.createImageData(W, H);
-  for (let row = 0; row < H; row++) img.data.set(px.subarray(row * W * 4, (row + 1) * W * 4), (H - 1 - row) * W * 4);
+  if (shapeProcActive()) {
+    // fillets are computed on the CPU grid: shade the PNG from that grid
+    const F = renderField(q), G = finalGrid(F).G, fg = hexToRgb(d.fg).map(v => v * 255), bg = hexToRgb(d.bg).map(v => v * 255);
+    const tr = state.export.pngTransparent;
+    for (let i = 0; i < F.W * F.H && i < W * H; i++) {
+      const a = clamp(0.5 - G[i], 0, 1), o = i * 4;
+      if (tr) { img.data[o] = fg[0]; img.data[o + 1] = fg[1]; img.data[o + 2] = fg[2]; img.data[o + 3] = a * 255; }
+      else { img.data[o] = bg[0] + (fg[0] - bg[0]) * a; img.data[o + 1] = bg[1] + (fg[1] - bg[1]) * a; img.data[o + 2] = bg[2] + (fg[2] - bg[2]) * a; img.data[o + 3] = 255; }
+    }
+  } else {
+    const px = renderOffscreen(W, H, { ox: 0, oy: 0, s: q }, state.export.pngTransparent ? 11 : 12);
+    for (let row = 0; row < H; row++) img.data.set(px.subarray(row * W * 4, (row + 1) * W * 4), (H - 1 - row) * W * 4);
+  }
   ctx.putImageData(img, 0, 0);
   return c;
 }
@@ -1630,7 +1823,7 @@ function restore(s) {
   const o = JSON.parse(s);
   state.doc = o.doc; state.ref = o.ref; state.layers = o.layers; state.selected = o.selected;
   processAllImages();
-  layersChanged(); buildDocPanel(); buildRefPanel();
+  layersChanged(); buildDocPanel(); buildRefPanel(); buildFilletPanel();
 }
 function undo() { if (histIndex > 0) { histIndex--; restore(undoHist[histIndex]); updateUndoButtons(); } }
 function redo() { if (histIndex < undoHist.length - 1) { histIndex++; restore(undoHist[histIndex]); updateUndoButtons(); } }
@@ -1770,7 +1963,7 @@ function buildProps() {
   if (L.type === 'text') buildTextProps(box, L, add);
   else if (L.type === 'image') {
     const a = assets.get(L.asset);
-    box.append(h('div', { class: 'note' }, a ? `${a.name}  ${a.w}x${a.h}${a.hasAlpha ? '  (alpha)' : ''}` : 'Missing image'));
+    box.append(h('div', { class: 'note' }, a ? (a.svg ? `${a.name}  (SVG vector, rasterized at Resolution)` : `${a.name}  ${a.w}x${a.h}${a.hasAlpha ? '  (alpha)' : ''}`) : 'Missing image'));
     box.append(segRow('Field', [['sdf', 'SDF (EDT)'], ['blur', 'Blur + Level']], () => L.mode, v => L.mode = v, () => { buildProps(); onLayerEdit(L, true); }));
     box.append(checkRow('Invert', () => L.invert, v => L.invert = v, () => onLayerEdit(L, true), 'Shape = white by default; invert for dark shapes'));
     box.append(selectRow('Resolution', [[512, '512'], [1024, '1024'], [2048, '2048'], [4096, '4096']], () => L.res, v => L.res = +v, () => onLayerEdit(L, true)));
@@ -1842,6 +2035,14 @@ function buildDocPanel() {
   box.append(colorRow('Shape color', () => d.fg, v => d.fg = v));
   box.append(colorRow('Background', () => d.bg, v => d.bg = v));
 }
+function buildFilletPanel() {
+  const box = $('filletCtl'), d = state.doc; box.innerHTML = '';
+  const live = () => { requestRender(); scheduleVector(); };
+  const m = Math.round(Math.max(d.w, d.h) * 0.15);
+  box.append(sliderRow('Inner fillet', () => d.fillet || 0, v => d.fillet = v, { min: 0, max: m, step: 0.5, onInput: live, tip: 'Rolling ball radius (doc px) for every concave corner of the final shape. Exact circles on any input' }));
+  box.append(sliderRow('Outer round', () => d.roundR || 0, v => d.roundR = v, { min: 0, max: m, step: 0.5, onInput: live, tip: 'Radius (doc px) for every convex corner of the final shape' }));
+  box.append(h('div', { class: 'note' }, 'Applied after all layers, on the final shape. Clean arcs on text, images and SVG where the per layer Profile can get noisy.'));
+}
 function buildCurvePanel() {
   const box = $('curveCtl'), e = state.export; box.innerHTML = '';
   const live = () => { requestRender(); scheduleVector(); };
@@ -1853,12 +2054,16 @@ function buildCurvePanel() {
 }
 function buildExportPanel() {
   buildCurvePanel();
+  buildFilletPanel();
   const box = $('exportCtl'), e = state.export; box.innerHTML = '';
   const live = () => { requestRender(); scheduleVector(); };
   box.append(sliderRow('Rings', () => e.rings, v => e.rings = Math.round(v), { min: 0, max: 64, step: 1, onInput: live, tip: 'Extra offset contours exported as strokes' }));
-  box.append(sliderRow('Ring step', () => e.ringStep, v => e.ringStep = v, { min: -100, max: 100, step: 0.5, onInput: live, tip: 'Distance between rings (negative = inward)' }));
+  if (!e.ringDir) { e.ringDir = e.ringStep < 0 ? 'in' : 'out'; e.ringStep = Math.abs(e.ringStep); }
+  box.append(segRow('Ring side', [['out', 'Outside'], ['in', 'Inside'], ['both', 'Both']], () => e.ringDir, v => e.ringDir = v, live));
+  box.append(sliderRow('Ring step', () => e.ringStep, v => e.ringStep = v, { min: 0.5, max: 100, step: 0.5, onInput: live, tip: 'Distance between rings (doc px)' }));
   box.append(sliderRow('Ring stroke', () => e.ringStroke, v => e.ringStroke = v, { min: 0.1, max: 20, step: 0.1 }));
   box.append(colorRow('SVG color', () => e.svgColor, v => e.svgColor = v));
+  box.append(checkRow('Rings in SVG', () => e.ringsInSvg !== false, v => e.ringsInSvg = v, null, 'Export the rings as stroked paths (rings-outside / rings-inside)'));
   box.append(checkRow('SVG bg rect', () => e.includeBg, v => e.includeBg = v));
   box.append(checkRow('PNG alpha', () => e.pngTransparent, v => e.pngTransparent = v));
 }
@@ -2007,7 +2212,7 @@ $('bDup').onclick = duplicate;
 $('bDel').onclick = removeLayer;
 document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
   const t = b.dataset.add;
-  if (t === 'image') $('fileImg').click();
+  if (t === 'image' || t === 'svg') $('fileImg').click();
   else if (t === 'text') addTextLayer();
   else if (t === 'reference') { $('refPanel').scrollIntoView({ block: 'nearest' }); $('fileRef').click(); }
   else addShape(t);

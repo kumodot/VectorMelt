@@ -26,12 +26,12 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ## Run it
 
 - **Online**: https://kumodot.github.io/VectorMelt/
-- **Local**: download the repo and double click `VectorMelt_v0.4.0.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
+- **Local**: download the repo and double click `VectorMelt_v0.5.0.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
 
 ## Workflow
 
 **Layers** (left panel, applied bottom to top)
-- *Image*: drop black and white images (logos, lettering, scans). Threshold (Otsu or manual), auto invert, *Smooth*, or the *Blur + Level* field.
+- *Image* / *SVG*: drop black and white images (logos, lettering, scans) or SVG files. SVG stays a vector and is rasterized at the layer *Resolution*. Threshold (Otsu or manual), auto invert, *Smooth*, or the *Blur + Level* field.
 - *Text*: type text, pick a font. Filter *All* / *Google* / *Installed*, search, *Other font name* for any Google family or local font, *Find installed fonts* (Chrome / Edge ask permission). *Weight*, *Italic*, *Align*, *Letter spacing*, *Line height*, *Detail*.
 - Shapes: *Circle*, *Ellipse*, *Box*, *Capsule*, *Star* (also polygons), *Ring*.
 - *Ref*: a reference image in the background with *Opacity*, never part of the shape.
@@ -43,12 +43,15 @@ VectorMelt melts black and white images, text and simple shapes together like me
 - *Contact only*: shapes that are only close do not bridge or bulge, the blend grows where they actually touch.
 - *Grow / shrink*, move, scale (corner handles) and rotate (top dot) on the canvas.
 
+**Exact fillets** (final shape)
+- *Inner fillet*: rolling ball radius for every concave corner. *Outer round*: radius for every convex corner. Exact arcs on any input, including text, images and SVG.
+
 **Preview and curves**
-- *Fill*, *Outline* and *Field* modes, *Vector overlay* with *Show nodes* (orange = corner) and *Show handles*.
+- *Fill*, *Outline* and *Field* modes, *Vector overlay* with *Show nodes* (orange = corner) and *Show handles*. A legend in the canvas corner tells which line is the live SDF edge (lavender) and which is the exported vector (cyan).
 - *Curves* panel: *Resolution*, *Tolerance* (how far the Bezier curves may drift from the shape), *Corner angle*, *Min area*.
 
 **Export**
-- *Export SVG*: one even-odd filled path, optional *Rings* (offset contours) as strokes, *SVG color*, optional background rect.
+- *Export SVG*: one even-odd filled path, optional *Rings* (offset contours, *Outside* / *Inside* / *Both*) as stroked `rings-outside` / `rings-inside` paths, *SVG color*, optional background rect.
 - *Export PNG* (transparent or with background).
 
 ### Shortcuts
@@ -75,6 +78,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 - WebGL2 fragment shader generated from the layer stack; image and text layers are float textures sampled with Catmull-Rom.
 - Image / text field: threshold, Felzenszwalb Euclidean distance transform, sub-pixel edges from anti-aliasing, Gaussian smoothing.
 - Blends: polynomial smooth min (soft), an angle aware circular arc fillet solved from the two field gradients (Profile), gradient based contact falloff.
+- Exact fillets and rings: the field is rebuilt as a true distance field (EDT on both sides + sub-pixel edge), then closed / opened by the radii.
 - Vector: the field is rendered on a grid on the GPU, traced with marching squares, sharp corners detected and recovered, then fitted with cubic Beziers (Schneider).
 
 ## Layout
@@ -82,7 +86,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ```
 index.html                 Pages entry: reads version.json, redirects to the versioned app
 version.json               current version + entry file
-VectorMelt_v0.4.0.html     the app (single file, no build step)
+VectorMelt_v0.5.0.html     the app (single file, no build step)
 assets/logo.svg            logo / favicon
 Samples/                   black and white test images
 screenshots/               README images and banner

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 (2026-11-09)
+- **SVG import**: drop an `.svg` on the canvas or use the new *SVG* button (*Image* accepts SVG too). The file stays a vector: it is rasterized at the layer *Resolution* (default 2048), sized from its `viewBox` (works without width / height), and saved inside `.vmelt` projects.
+- **Exact fillets** panel: *Inner fillet* (rolling ball on every concave corner) and *Outer round* (every convex corner), computed on the final shape from exact distances. Clean circular arcs on text, images and SVG, where the per layer *Profile* can get noisy. Used by the preview, the vector overlay, SVG and PNG export.
+- **Rings**: built from a re-distanced field, so offsets are clean inside and outside the shapes (they were noisy and deformed where layers overlap). New *Ring side*: *Outside*, *Inside* or *Both*. *Rings in SVG* toggle; the SVG gets `rings-outside` and `rings-inside` paths.
+- **Blend fixes**: blend inputs are normalized by their gradient length (chained layers keep the right radius), and the *Profile* arc falls back to the soft blend near ridges (inside corners of letters, gaps between copies) instead of making spikes. Text, image and SVG layers start with *Profile* 0.
+- **Legend** in the canvas corner. The SDF edge in *Outline* mode is now lavender, the exported vector stays cyan, rings orange.
+
 ## 0.4.0 (2026-11-09)
 - **Text layers**: type text and melt it like any other layer. Fonts from Google Fonts or installed on your computer, with a filter (*All* / *Google* / *Installed*), search, *Other font name* (any Google family or local font by name) and *Find installed fonts* (Chrome / Edge list every installed font after asking permission). *Weight*, *Italic*, *Align*, *Letter spacing*, *Line height*, *Detail*.
 - **About** dialog with shortcuts.
