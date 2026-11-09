@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (2026-11-09)
+- **Profile is now exact**: on a *Round* layer, *Profile* above 0 puts a true rolling ball fillet (radius 0.6 x *Blend*) at the junction between that layer and everything below it. Each layer's own field is rendered, the layers are combined on a grid, and the junction is closed (*Union*) or opened (*Subtract* / *Intersect*) with exact distances, only where the ball touches both edges. The letters' own corners stay as they are. The old per pixel arc, which made noise and spikes on text, is gone.
+- **Fillet circles** (Preview): construction circles of the exact fillets, with the ball, its centre and the two tangent points.
+- Tested on two overlapping copies of a text layer at *Profile* 0 / 0.5 / 1: no spikes; exported curves stay within 0.4 px of the shape; on straight edges the fillet radius measures 60.1 for a target of 60 at 0, 20, 40 and -30 degrees.
+
 ## 0.5.0 (2026-11-09)
 - **SVG import**: drop an `.svg` on the canvas or use the new *SVG* button (*Image* accepts SVG too). The file stays a vector: it is rasterized at the layer *Resolution* (default 2048), sized from its `viewBox` (works without width / height), and saved inside `.vmelt` projects.
 - **Exact fillets** panel: *Inner fillet* (rolling ball on every concave corner) and *Outer round* (every convex corner), computed on the final shape from exact distances. Clean circular arcs on text, images and SVG, where the per layer *Profile* can get noisy. Used by the preview, the vector overlay, SVG and PNG export.

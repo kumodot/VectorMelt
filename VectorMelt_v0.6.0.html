@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.5.0</title>
+<title>VectorMelt v0.6.0</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,10 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.6.0  Profile is now an exact rolling ball fillet at each layer junction (CPU grid pipeline:
+         every layer field rendered on the GPU, combined on the grid, junction closed / opened
+         with exact distances). The old per pixel arc (noisy on text) is gone. Construction
+         circles overlay (ball, centre, tangent points). Program cache.
   0.5.0  Real SVG import (kept as a vector, rasterized at the layer Resolution, viewBox sizing,
          SVG button + drag and drop). Exact fillets panel: Inner fillet / Outer round on the
          final shape (rolling ball via exact distances, clean on text, images and SVG).
@@ -230,7 +234,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
 
 <script>
 'use strict';
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.6.0';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -241,7 +245,7 @@ console.log(`${APP_NAME} v${APP_VERSION}`);
    ========================================================================== */
 const state = {
   doc: { w: 1024, h: 1024, iso: 0, bg: '#141518', fg: '#f2f0ea', fillet: 0, roundR: 0 },
-  preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false },
+  preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false, circles: true },
   export: { quality: 2, tol: 0.35, corner: 45, minArea: 4, rings: 0, ringStep: 12, ringDir: 'out', ringsInSvg: true, ringStroke: 1, includeBg: false, pngTransparent: true, svgColor: '#000000' },
   ref: { asset: null, opacity: 0.5, visible: true, locked: true, x: 512, y: 512, scale: 1 },
   layers: [],
@@ -301,24 +305,6 @@ float contactK(vec3 a, vec3 b, float k, float c){
   float t = smoothstep(-0.9, -0.1, dot(ga, gb)/(la*lb));
   return k*(1.0 - c + c*t);
 }
-// True circular fillet (rolling ball of radius r) between two surfaces meeting at ANY angle.
-// a, b are distances; c = cos of the angle between their (unit) gradients.
-// The fillet center sits at a = r, b = r. The offset v from that center is solved in the
-// oblique (a, b) frame, so the arc stays circular instead of turning into an ellipse.
-// c is clamped away from +-1: for (nearly) parallel or facing surfaces the exact center runs off
-// to infinity and the field would jump. Clamping c (and using it everywhere) keeps the field
-// continuous; those cases behave like a very narrow wedge.
-float arcCore(float a, float b, float r, float c0){
-  float c = clamp(c0, -0.97, 0.97);
-  float s2 = 1.0 - c*c;
-  float x = r - a, y = r - b;
-  float m = min(a, b);
-  if(x - c*y < 0.0 || y - c*x < 0.0) return m;   // outside the arc's sector: plain union
-  float arc = r - sqrt(max((x*x + y*y - 2.0*c*x*y)/s2, 0.0));
-  // Nearly collinear edges (c -> 1): the true fillet shrinks to nothing and the formula gets
-  // ill-conditioned (wobbles on curved input), so fade to the plain union there.
-  return mix(arc, m, smoothstep(0.7, 0.95, c0));
-}
 float polyU(float a, float b, float k){ float h = max(k - abs(a - b), 0.0)/k; return min(a, b) - h*h*k*0.25; }
 // Blended fields are no longer true distances: where they got steeper than a distance (gradient
 // length > 1) the next blend would read radii too small. Divide by the gradient length there.
@@ -335,17 +321,7 @@ vec3 blend3(vec3 a0, vec3 b0, float k, vec4 B){
   if(ke <= 0.0) return min(a, b);
   float r = ke*0.6;
   if(B.x > 0.5) return min(min(a, b), (a - r + b)*0.70710678);
-  vec3 soft = vec3(polyU(a.x, b.x, ke), polyU(a.y, b.y, ke), polyU(a.z, b.z, ke));
-  if(B.y <= 0.0) return soft;
-  vec2 ga = vec2(a.y - a.x, a.z - a.x), gb = vec2(b.y - b.x, b.z - b.x);
-  float la = length(ga), lb = length(gb);
-  float c = (la > 1e-6 && lb > 1e-6) ? clamp(dot(ga, gb)/(la*lb), -1.0, 1.0) : 0.0;
-  vec3 arc = vec3(arcCore(a.x, b.x, r, c), arcCore(a.y, b.y, r, c), arcCore(a.z, b.z, r, c));
-  // The arc needs a trustworthy edge direction. Near a ridge of either field (inside corners of a
-  // letter, gaps between two parts of one shape) the direction flips from one sample to the next
-  // and the arc would jump, so fall back to the soft blend there.
-  float trust = smoothstep(0.55, 0.9, min(la, lb)/uGradE);
-  return mix(soft, arc, B.y*trust);
+  return vec3(polyU(a.x, b.x, ke), polyU(a.y, b.y, ke), polyU(a.z, b.z, ke));
 }
 float sdCircle(vec2 p, float r){ return length(p) - r; }
 float sdEllipse(vec2 p, vec2 r){
@@ -403,7 +379,9 @@ function shapeExpr(L, i, texIdx) {
   return '1e5';
 }
 
+let visOverride = null; // used to render a single layer's own field for the CPU pipeline
 function visibleLayers() {
+  if (visOverride) return visOverride;
   const out = []; let tex = 0;
   for (const L of state.layers) {
     if (!L.visible) continue;
@@ -414,7 +392,9 @@ function visibleLayers() {
 }
 
 // Layers whose blend needs field gradients (Contact only, or a Round profile above 0)
-function needs3pt(L) { return (L.contact || 0) > 0 || ((L.style || 'round') === 'round' && (L.profile || 0) > 0 && (L.k || 0) > 0); }
+function needs3pt(L) { return (L.contact || 0) > 0; }
+// Round layers with Profile > 0 get the exact rolling ball fillet, computed on the CPU grid
+function exactLayer(L) { return (L.style || 'round') === 'round' && (L.profile || 0) > 0 && (L.k || 0) > 0; }
 // Finite difference step for field gradients. A step tied to the largest fillet radius gives the
 // arc fillet a tangent "at the scale of the ball", so curved or rounded edges do not make it wobble.
 function gradStep(vis) {
@@ -540,15 +520,19 @@ function ensureProgram() {
   const key = vis.map(v => v.L.type + ':' + v.L.op + ':' + v.tex).join('|') + (vis.some(v => needs3pt(v.L)) ? '|3pt' : '');
   progVis = vis;
   if (prog && key === progKey) return;
+  const hit = progCache.get(key);
+  if (hit) { prog = hit.prog; U = hit.U; progKey = key; return; }
   const fs = compile(gl.FRAGMENT_SHADER, buildFS(vis));
   const p = gl.createProgram(); gl.attachShader(p, vsObj); gl.attachShader(p, fs); gl.linkProgram(p);
   if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
   gl.deleteShader(fs);
-  if (prog) gl.deleteProgram(prog);
+  if (progCache.size > 24) { for (const [k2, v2] of progCache) { gl.deleteProgram(v2.prog); progCache.delete(k2); break; } }
   prog = p; progKey = key; U = {};
   const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
   for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); const name = info.name.replace(/\[0\]$/, ''); U[name] = gl.getUniformLocation(p, info.name); }
+  progCache.set(key, { prog, U });
 }
+const progCache = new Map();
 
 // Dummy textures
 function makeTex(internal, w, h, fmt, type, data, filter) {
@@ -582,7 +566,7 @@ function layerUniforms(L) {
       break;
     }
   }
-  const B = [L.style === 'chamfer' ? 1 : 0, clamp(L.profile || 0, 0, 1), clamp(L.contact || 0, 0, 1), 0];
+  const B = [L.style === 'chamfer' ? 1 : 0, 0, clamp(L.contact || 0, 0, 1), 0]; // profile is exact, on the CPU grid
   return { T, P: [scale, L.grow || 0, Math.max(0, L.k || 0), 0], Q, B };
 }
 
@@ -609,7 +593,7 @@ function setCommonUniforms(resW, resH, view, mode) {
     const on = mode < 10 && ringInfo && ringTex;
     gl.bindTexture(gl.TEXTURE_2D, on ? ringTex : dummySDF);
     gl.uniform1i(U.uRingTex, unit); gl.uniform1i(U.uRingOn, on ? 1 : 0); gl.uniform1f(U.uRingQ, on ? ringInfo.q : 1);
-    const su = MAX_UNITS - 2, son = mode < 10 && shapeInfo && shapeTex && shapeProcActive();
+    const su = MAX_UNITS - 2, son = mode < 10 && shapeInfo && shapeTex && cpuActive();
     gl.activeTexture(gl.TEXTURE0 + su);
     gl.bindTexture(gl.TEXTURE_2D, son ? shapeTex : dummySDF);
     gl.uniform1i(U.uShapeTex, su); gl.uniform1i(U.uShapeOn, son ? 1 : 0); gl.uniform1f(U.uShapeQ, son ? shapeInfo.q : 1);
@@ -1318,14 +1302,15 @@ function updateLegend() {
   if (state.export.rings > 0) items.push(['line', '#ffb347', 'Rings (exported as strokes)']);
   if (p.vector && (p.nodes || p.handles)) { items.push(['sq', '#ffffff', 'Smooth node']); items.push(['sq', '#ff9a3d', 'Corner node']); }
   if (p.vector && p.handles) items.push(['line', 'rgba(255,255,255,0.5)', 'Bezier handles']);
-  if (shapeProcActive()) items.push(['note', '', 'Exact fillets on (preview from the last vector pass)']);
+  if (p.circles && p.vector) items.push(['dash', '#b8f27a', 'Construction circles (fillet balls)']);
+  if (cpuActive()) items.push(['note', '', 'Exact profile / fillets: preview updates after each change']);
   const key = JSON.stringify(items);
   if (key === legendKey) return;
   legendKey = key;
   const el = $('legend');
   el.style.display = items.length ? 'block' : 'none';
   el.innerHTML = items.map(([t, c, label]) => t === 'note' ? `<div style="color:#8b9099">${label}</div>`
-    : `<div><span class="${t === 'sq' ? 'sq' : 'sw'}" style="${t === 'sq' ? 'background:' + c : 'border-color:' + c}"></span>${label}</div>`).join('');
+    : `<div><span class="${t === 'sq' ? 'sq' : 'sw'}" style="${t === 'sq' ? 'background:' + c : 'border-color:' + c + (t === 'dash' ? ';border-top-style:dashed' : '')}"></span>${label}</div>`).join('');
 }
 function drawOverlay() {
   updateLegend();
@@ -1352,6 +1337,21 @@ function drawOverlay() {
       ov.stroke();
       const hr = 2.2 * dpr;
       for (const [, b] of vectorResult.handles) { const [bx, by] = docToScreen(b[0], b[1]); ov.beginPath(); ov.arc(bx, by, hr, 0, Math.PI * 2); ov.fill(); }
+    }
+    if (state.preview.circles && vectorResult.circles && vectorResult.circles.length) {
+      ov.save();
+      ov.strokeStyle = 'rgba(184,242,122,0.85)'; ov.fillStyle = '#b8f27a'; ov.lineWidth = 1 * dpr; ov.setLineDash([5 * dpr, 4 * dpr]);
+      for (const C of vectorResult.circles) {
+        const [cx, cy] = docToScreen(C.c[0], C.c[1]), rr = C.r * view.s;
+        ov.beginPath(); ov.arc(cx, cy, rr, 0, Math.PI * 2); ov.stroke();
+      }
+      ov.setLineDash([]);
+      for (const C of vectorResult.circles) {
+        const [cx, cy] = docToScreen(C.c[0], C.c[1]), k = 4 * dpr;
+        ov.beginPath(); ov.moveTo(cx - k, cy); ov.lineTo(cx + k, cy); ov.moveTo(cx, cy - k); ov.lineTo(cx, cy + k); ov.stroke();
+        for (const t of [C.t1, C.t2]) { const [tx, ty] = docToScreen(t[0], t[1]); ov.beginPath(); ov.arc(tx, ty, 3 * dpr, 0, Math.PI * 2); ov.fill(); }
+      }
+      ov.restore();
     }
     if (state.preview.nodes || state.preview.handles) {
       const r = 2.8 * dpr;
@@ -1659,6 +1659,114 @@ function redistance(g, W, H) {
   }
   return out;
 }
+/* ============================================================================
+   CPU layer pipeline (exact Profile)
+   When a Round layer has Profile > 0, its junction with everything below gets a true rolling
+   ball fillet (radius 0.6 x Blend): each layer's own field is rendered on the GPU, combined
+   on the grid, and the junction is closed (union) or opened (subtract / intersect) with
+   exact distances, only near both edges. No edge directions involved, so no noise.
+   ========================================================================== */
+function cpuActive() { return shapeProcActive() || visibleLayers().some(v => exactLayer(v.L)); }
+function renderLayerField(v, q) {
+  const iso = state.doc.iso;
+  visOverride = [{ L: Object.assign({}, v.L, { op: 'union', k: 0, contact: 0 }), tex: v.tex >= 0 ? 0 : -1 }];
+  state.doc.iso = 0;
+  try { return renderField(q); }
+  finally { visOverride = null; state.doc.iso = iso; requestRender(); }
+}
+const smooth01 = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+function polyMin(a, b, k) { if (k <= 0) return Math.min(a, b); const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; }
+function gridGrad(G, W, H, i) {
+  const x = i % W, y = (i - x) / W;
+  const xl = x > 0 ? i - 1 : i, xr = x < W - 1 ? i + 1 : i, yu = y > 0 ? i - W : i, yd = y < H - 1 ? i + W : i;
+  return [(G[xr] - G[xl]) / Math.max(1, (xr - xl)), (G[yd] - G[yu]) / Math.max(1, (yd - yu) / W)];
+}
+function sampleGrid(G, W, H, x, y) {
+  const fx = clamp(x, 0, W - 1.001), fy = clamp(y, 0, H - 1.001), ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy, i = iy * W + ix;
+  return (G[i] * (1 - tx) + G[i + 1] * tx) * (1 - ty) + (G[i + W] * (1 - tx) + G[i + W + 1] * tx) * ty;
+}
+function combineLayer(A, B, W, H, L, k, q, circles) {
+  const N = W * H, op = L.op, sa = op === 'union' ? 1 : -1, sb = op === 'intersect' ? -1 : 1, so = op === 'union' ? 1 : -1;
+  const chamfer = L.style === 'chamfer', contact = clamp(L.contact || 0, 0, 1);
+  const soft = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const a = sa * A[i], b = sb * B[i];
+    let ke = k;
+    if (contact > 0 && k > 0) {
+      const ga = gridGrad(A, W, H, i), gb = gridGrad(B, W, H, i);
+      const la = Math.hypot(ga[0], ga[1]), lb = Math.hypot(gb[0], gb[1]);
+      if (la > 1e-6 && lb > 1e-6) {
+        const c = sa * sb * (ga[0] * gb[0] + ga[1] * gb[1]) / (la * lb);
+        ke = k * (1 - contact + contact * smooth01(-0.9, -0.1, c));
+      }
+    }
+    let v;
+    if (ke <= 0) v = Math.min(a, b);
+    else if (chamfer) v = Math.min(Math.min(a, b), (a - 0.6 * ke + b) * Math.SQRT1_2);
+    else v = polyMin(a, b, ke);
+    soft[i] = so * v;
+  }
+  if (!exactLayer(L)) return soft;
+  const prof = clamp(L.profile, 0, 1), r = 0.6 * k;
+  const Ad = redistance(A, W, H);
+  const S = new Float32Array(N);
+  for (let i = 0; i < N; i++) S[i] = op === 'union' ? Math.min(Ad[i], B[i]) : op === 'subtract' ? Math.max(Ad[i], -B[i]) : Math.max(Ad[i], B[i]);
+  const Sd = redistance(S, W, H);
+  let X;
+  if (op === 'union') { X = redistance(Sd.map(v => v - r), W, H); for (let i = 0; i < N; i++) X[i] += r; }   // closing
+  else { X = redistance(Sd.map(v => v + r), W, H); for (let i = 0; i < N; i++) X[i] -= r; }                  // opening
+  const E = new Float32Array(N), out = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    // keep the fillet only near both edges (a ball touching both sits within 2r of each)
+    const m = op === 'union' ? Math.max(Ad[i], B[i]) : Math.max(Math.abs(Ad[i]), Math.abs(B[i]));
+    const w = smooth01(1.6 * r, 2.4 * r, m);
+    E[i] = X[i] * (1 - w) + S[i] * w;
+    out[i] = soft[i] * (1 - prof) + E[i] * prof;
+  }
+  if (circles && prof >= 0.5) findCircles(E, S, W, H, r, op === 'union', q, circles);
+  return out;
+}
+// Construction circles: runs of the fillet contour that leave the sharp shape S. The ball centre
+// sits r away from the run's middle point, along the outward (union) or inward (opening) normal.
+function findCircles(E, S, W, H, r, union, q, out) {
+  const map = (p) => [(p[0] + 0.5) / q, (p[1] + 0.5) / q];
+  for (const loop of contour(E, W, H, 0)) {
+    const n = loop.length;
+    if (n < 6) continue;
+    const flag = loop.map(p => { const s = sampleGrid(S, W, H, p[0], p[1]); return union ? s > 0.75 : s < -0.75; });
+    let start = flag.indexOf(false);
+    if (start < 0) continue;
+    for (let c = 0, i = start; c < n; ) {
+      if (!flag[i]) { i = (i + 1) % n; c++; continue; }
+      const run = [];
+      while (flag[i] && c < n) { run.push(loop[i]); i = (i + 1) % n; c++; }
+      if (run.length < 4) continue;
+      const pm = run[run.length >> 1];
+      const e = 0.75, gx = sampleGrid(E, W, H, pm[0] + e, pm[1]) - sampleGrid(E, W, H, pm[0] - e, pm[1]), gy = sampleGrid(E, W, H, pm[0], pm[1] + e) - sampleGrid(E, W, H, pm[0], pm[1] - e);
+      const gl2 = Math.hypot(gx, gy); if (gl2 < 1e-6) continue;
+      const nx = gx / gl2, ny = gy / gl2, sgn = union ? 1 : -1;
+      const c0 = map([pm[0] + sgn * nx * r, pm[1] + sgn * ny * r]);
+      out.push({ c: c0, r: r / q, t1: map(run[0]), t2: map(run[run.length - 1]), mid: map(pm), pts: run.map(map) });
+      if (out.length > 400) return;
+    }
+  }
+}
+function cpuField(q, wantCircles) {
+  const vis = visibleLayers(), circles = [];
+  let A = null, W = 0, H = 0, qq = q;
+  for (const v of vis) {
+    const F = renderLayerField(v, q);
+    W = F.W; H = F.H; qq = F.q;
+    if (!A) { A = new Float32Array(W * H); if (v.L.op === 'union') A.set(F.g); else A.fill(1e5); continue; }
+    A = combineLayer(A, F.g, W, H, v.L, (v.L.k || 0) * qq, qq, wantCircles ? circles : null);
+  }
+  if (!A) { const F = renderField(q); return F; }
+  const iso = state.doc.iso * qq;
+  if (iso) for (let i = 0; i < A.length; i++) A[i] -= iso;
+  return { g: A, W, H, q: qq, circles };
+}
+function getField(q, wantCircles) { return cpuActive() ? cpuField(q, wantCircles) : renderField(q); }
+
 // Exact fillets on the final shape: closing (Inner fillet) rounds every concave corner with a true
 // rolling ball, opening (Outer round) rounds every convex corner. Built from exact distances
 // (EDT), so it works on any input (text, images, SVG, already blended layers). Grid px units.
@@ -1675,7 +1783,7 @@ function computeVector(q, opts = {}) {
   const t0 = performance.now();
   processAllImages();
   const ex = state.export;
-  const F = renderField(q);
+  const F = getField(q, !!opts.circles);
   q = F.q;
   const map = (p) => [(p[0] + 0.5) / q, (p[1] + 0.5) / q];
   const tol = ex.tol * q, minA = ex.minArea * q * q;
@@ -1712,7 +1820,7 @@ function computeVector(q, opts = {}) {
       segs += curves.length; ringPaths++;
     }
   }
-  return { fillD, ringD, ringOutD, ringInD, nodes, handles, paths, ringPaths, segs, ms: performance.now() - t0, W: F.W, H: F.H, q, ringGrid, shapeGrid: FG.exact ? FG.G : null };
+  return { fillD, ringD, ringOutD, ringInD, nodes, handles, paths, ringPaths, segs, ms: performance.now() - t0, W: F.W, H: F.H, q, ringGrid, shapeGrid: cpuActive() ? FG.G : null, circles: F.circles || [] };
 }
 // Ring offsets in doc px: outside (+), inside (-) or both. Old projects stored a signed step.
 function ringLevels() {
@@ -1728,7 +1836,7 @@ function ringLevels() {
 }
 let vecTimer = null, vecLast = 0;
 function scheduleVector() {
-  if (!state.preview.vector && !(state.export.rings > 0) && !shapeProcActive()) { vectorResult = null; updateRingTex(null); requestRender(); return; }
+  if (!state.preview.vector && !(state.export.rings > 0) && !cpuActive()) { vectorResult = null; updateRingTex(null); requestRender(); return; }
   clearTimeout(vecTimer);
   const wait = Math.max(0, 90 - (performance.now() - vecLast));
   vecTimer = setTimeout(runVectorPreview, dragging ? Math.max(wait, 60) : 60);
@@ -1737,9 +1845,9 @@ function runVectorPreview() {
   vecLast = performance.now();
   try {
     const d = state.doc;
-    const budget = dragging ? 600000 : (shapeProcActive() ? 1500000 : 2500000);
+    const budget = dragging ? 600000 : (cpuActive() ? 1500000 : 2500000);
     const q = Math.min(state.export.quality, Math.sqrt(budget / (d.w * d.h)));
-    vectorResult = computeVector(q, { nodes: state.preview.nodes || state.preview.handles, handles: state.preview.handles });
+    vectorResult = computeVector(q, { nodes: state.preview.nodes || state.preview.handles, handles: state.preview.handles, circles: state.preview.circles });
     updateRingTex(vectorResult);
     setStatus(`Vector preview: ${vectorResult.paths} paths, ${vectorResult.ringPaths} rings, ${vectorResult.segs} curves, ${vectorResult.ms.toFixed(0)} ms`);
   } catch (e) { console.error(e); setStatus('Vector error: ' + e.message); }
@@ -1785,9 +1893,9 @@ function buildPNGCanvas() {
   const W = Math.round(d.w * q), H = Math.round(d.h * q);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const ctx = c.getContext('2d'), img = ctx.createImageData(W, H);
-  if (shapeProcActive()) {
-    // fillets are computed on the CPU grid: shade the PNG from that grid
-    const F = renderField(q), G = finalGrid(F).G, fg = hexToRgb(d.fg).map(v => v * 255), bg = hexToRgb(d.bg).map(v => v * 255);
+  if (cpuActive()) {
+    // exact profile / fillets are computed on the CPU grid: shade the PNG from that grid
+    const F = getField(q), G = finalGrid(F).G, fg = hexToRgb(d.fg).map(v => v * 255), bg = hexToRgb(d.bg).map(v => v * 255);
     const tr = state.export.pngTransparent;
     for (let i = 0; i < F.W * F.H && i < W * H; i++) {
       const a = clamp(0.5 - G[i], 0, 1), o = i * 4;
@@ -1957,7 +2065,7 @@ function buildProps() {
   const add = (r) => { box.append(r); propRows.push(r); return r; };
   add(sliderRow('Blend', () => L.k, v => L.k = v, { min: 0, max: Math.round(m * 0.4), step: 1, onInput: () => onLayerEdit(L), tip: 'Metaball blend radius (doc px) against everything below this layer' }));
   box.append(segRow('Blend style', [['round', 'Round'], ['chamfer', 'Chamfer']], () => L.style || 'round', v => L.style = v, () => { buildProps(); onLayerEdit(L); }));
-  if ((L.style || 'round') === 'round') add(sliderRow('Profile', () => L.profile || 0, v => L.profile = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: '0 = soft SDF blend (can bulge or flatten), 1 = true circular arc tangent to both edges at any angle (rolling ball fillet)' }));
+  if ((L.style || 'round') === 'round') add(sliderRow('Profile', () => L.profile || 0, v => L.profile = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: '0 = soft SDF blend, 1 = exact rolling ball fillet (radius 0.6 x Blend) at this layer junction. Computed on the grid, preview updates after each change' }));
   add(sliderRow('Contact only', () => L.contact || 0, v => L.contact = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: 'Less blend where surfaces face each other: no bridging between nearby shapes, blends only where they touch' }));
   add(sliderRow('Grow / shrink', () => L.grow, v => L.grow = v, { min: -Math.round(m * 0.1), max: Math.round(m * 0.1), step: 0.5, onInput: () => onLayerEdit(L), tip: 'Offset the surface (doc px)' }));
   if (L.type === 'text') buildTextProps(box, L, add);
@@ -2023,6 +2131,7 @@ function buildPreviewPanel() {
   box.append(vectorRow);
   box.append(checkRow('Show nodes', () => p.nodes, v => p.nodes = v, scheduleVector, 'White = smooth node, orange = corner'));
   box.append(checkRow('Show handles', () => p.handles, v => p.handles = v, scheduleVector, 'Bezier control handles'));
+  box.append(checkRow('Fillet circles', () => p.circles, v => p.circles = v, scheduleVector, 'Construction circles of the exact Profile fillets (ball, centre, tangent points)'));
 }
 function buildDocPanel() {
   const box = $('docCtl'), d = state.doc; box.innerHTML = '';

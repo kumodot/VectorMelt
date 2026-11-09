@@ -26,7 +26,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ## Run it
 
 - **Online**: https://kumodot.github.io/VectorMelt/
-- **Local**: download the repo and double click `VectorMelt_v0.5.0.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
+- **Local**: download the repo and double click `VectorMelt_v0.6.0.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
 
 ## Workflow
 
@@ -39,7 +39,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 **Blending** (per layer)
 - *Operation*: *Union*, *Subtract* (cut holes, image into image works), *Intersect*.
 - *Blend*: blend radius. *Blend style*: *Round* or *Chamfer*.
-- *Profile*: 0 is the classic soft SDF blend, 1 is a true circular arc fillet tangent to both edges at any angle (like a rolling ball fillet).
+- *Profile*: 0 is the classic soft SDF blend, 1 is an exact rolling ball fillet at this layer's junction (radius 0.6 x *Blend*), tangent to both edges at any angle, on shapes, text, images and SVG. *Fillet circles* in Preview shows the construction circles.
 - *Contact only*: shapes that are only close do not bridge or bulge, the blend grows where they actually touch.
 - *Grow / shrink*, move, scale (corner handles) and rotate (top dot) on the canvas.
 
@@ -77,7 +77,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 
 - WebGL2 fragment shader generated from the layer stack; image and text layers are float textures sampled with Catmull-Rom.
 - Image / text field: threshold, Felzenszwalb Euclidean distance transform, sub-pixel edges from anti-aliasing, Gaussian smoothing.
-- Blends: polynomial smooth min (soft), an angle aware circular arc fillet solved from the two field gradients (Profile), gradient based contact falloff.
+- Blends: polynomial smooth min (soft) on the GPU; *Profile* fillets on a CPU grid: each layer field rendered separately, combined, junction closed / opened with exact distances (EDT), restricted to where the ball touches both edges; gradient based contact falloff.
 - Exact fillets and rings: the field is rebuilt as a true distance field (EDT on both sides + sub-pixel edge), then closed / opened by the radii.
 - Vector: the field is rendered on a grid on the GPU, traced with marching squares, sharp corners detected and recovered, then fitted with cubic Beziers (Schneider).
 
@@ -86,7 +86,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ```
 index.html                 Pages entry: reads version.json, redirects to the versioned app
 version.json               current version + entry file
-VectorMelt_v0.5.0.html     the app (single file, no build step)
+VectorMelt_v0.6.0.html     the app (single file, no build step)
 assets/logo.svg            logo / favicon
 Samples/                   black and white test images
 screenshots/               README images and banner
