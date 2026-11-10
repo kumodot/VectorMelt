@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.6 (2026-11-09)
+- **Profile only touches the junction**: the rolling ball used to also fill a layer's own notches when they sat near the junction (the inner V of an arrow got bulged). Now each filled pixel is kept only when its ball touches both the layer and what is below it. Small gaps closed in on all sides by both parts are still filled.
+- **Self affect** per layer (under *Profile*): brings the old behaviour back for that layer.
+- **Step cache** for the exact pipeline: the combined field after each layer is kept, so editing or moving a layer only recomputes from that layer up, and redrawing with nothing changed is instant.
+
 ## 0.6.5 (2026-11-09)
 - **Fast edit** (Preview, on by default): while you drag a layer, the gizmo or a shape slider, or nudge with the arrows, the exact *Profile* / fillets are skipped and the live soft blend is shown. The exact result is rebuilt when you let go. On 8 layers with *Profile* 1 a preview update went from about 4 s to 0.16 s while dragging (software GPU in tests, much faster on a real one).
 - **Layer Profile** master switch (*Exact fillets* panel): turns *Profile* off for every layer at once, keeping each layer's value. Saved with the project. The layer panel shows a note while it is off.

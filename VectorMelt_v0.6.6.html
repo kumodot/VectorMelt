@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.6.5</title>
+<title>VectorMelt v0.6.6</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,10 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.6.6  Profile fillets only touch the junction: a layer's own notches (and the ones of the layers
+         below) are no longer filled when they sit near the junction. Per layer "Self affect"
+         brings the old behaviour back. Step cache: the exact pipeline keeps the combined field
+         after each layer, so editing a layer only recomputes from it up.
   0.6.5  Fast edit (Preview, on by default): while dragging a layer, the gizmo, a slider or nudging,
          the exact Profile / fillets are skipped and the live soft blend is shown; rebuilt on
          release. Layer Profile master switch (Exact fillets panel) turns Profile off for all
@@ -276,7 +280,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
 
 <script>
 'use strict';
-const APP_VERSION = '0.6.5';
+const APP_VERSION = '0.6.6';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -294,6 +298,7 @@ const state = {
   selected: null,
 };
 const assets = new Map();   // key -> {name, dataURL, img, w, h, hasAlpha, autoInvert}
+let imgSerial = 0;
 const imgCache = new Map(); // layer id -> {key, W, H, sc, data, tex}
 let idCounter = 1;
 const uid = () => 'L' + (Date.now().toString(36)) + (idCounter++);
@@ -860,6 +865,31 @@ function edt2d(f, W, H) {
     for (let x = 0; x < W; x++) f[y * W + x] = d[x];
   }
 }
+// Nearest site transform: index of the closest pixel where isSite(i) is true (-1 if none).
+// Same separable lower envelope as edt2d, keeping the argmin of each pass.
+function nearestSite(W, H, isSite) {
+  const N = W * H, D1 = new Float64Array(N), AY = new Int32Array(N), out = new Int32Array(N);
+  const n = Math.max(W, H), f = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  const env = (len, cb) => {
+    let k = 0; v[0] = 0; z[0] = -INF; z[1] = INF;
+    for (let q = 1; q < len; q++) {
+      let s2 = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+      while (s2 <= z[k]) { k--; s2 = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+      k++; v[k] = q; z[k] = s2; z[k + 1] = INF;
+    }
+    k = 0;
+    for (let q = 0; q < len; q++) { while (z[k + 1] < q) k++; const dq = q - v[k]; cb(q, dq * dq + f[v[k]], v[k]); }
+  };
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) f[y] = isSite(y * W + x) ? 0 : INF;
+    env(H, (y, d, a) => { D1[y * W + x] = d; AY[y * W + x] = a; });
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) f[x] = D1[y * W + x];
+    env(W, (x, d, a) => { const j = y * W + a; out[y * W + x] = d >= INF * 0.5 ? -1 : AY[j] * W + a; });
+  }
+  return out;
+}
 function boxesForGauss(sigma, n) {
   const wIdeal = Math.sqrt((12 * sigma * sigma / n) + 1);
   let wl = Math.floor(wIdeal); if (wl % 2 === 0) wl--;
@@ -1169,7 +1199,7 @@ function processImage(L) {
   }
   if (old && old.tex) gl.deleteTexture(old.tex);
   const tex = makeTex(gl.R32F, W, H, gl.RED, gl.FLOAT, data, gl.NEAREST);
-  const c = { key, W, H, sc, data, tex, ms: performance.now() - t0 };
+  const c = { key, W, H, sc, data, tex, ms: performance.now() - t0, serial: ++imgSerial };
   imgCache.set(L.id, c);
   return c;
 }
@@ -1900,6 +1930,28 @@ function sampleGrid(G, W, H, x, y) {
   const fx = clamp(x, 0, W - 1.001), fy = clamp(y, 0, H - 1.001), ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy, i = iy * W + ix;
   return (G[i] * (1 - tx) + G[i + 1] * tx) * (1 - ty) + (G[i + W] * (1 - tx) + G[i + W + 1] * tx) * ty;
 }
+// A small gap closed in on all sides by both parts (a notch of B mostly covered by A) is a junction
+// pocket, not a notch of one part: the closing filled it and so do we. Gaps bordered by one part
+// only (a letter counter) stay open.
+function refillPockets(X, X0, Ad, Bd, W, H) {
+  const N = W * H, seen = new Uint8Array(N), stack = [], comp = [];
+  for (let s0 = 0; s0 < N; s0++) {
+    if (seen[s0] || X[s0] < 0 || X0[s0] >= 0) continue;
+    stack.length = 0; comp.length = 0; stack.push(s0); seen[s0] = 1;
+    let open = false, nearA = false, nearB = false;
+    while (stack.length) {
+      const i = stack.pop(); comp.push(i);
+      if (X0[i] >= 0) open = true;
+      const x = i % W, y = (i - x) / W;
+      if (x === 0 || y === 0 || x === W - 1 || y === H - 1) { open = true; continue; }
+      for (const j of [i - 1, i + 1, i - W, i + W, i - W - 1, i - W + 1, i + W - 1, i + W + 1]) {   // 8-connected: a pocket pinched to one diagonal pixel stays one pocket
+        if (X[j] < 0) { if (Ad[j] < 0) nearA = true; if (Bd[j] < 0) nearB = true; continue; }
+        if (!seen[j]) { seen[j] = 1; stack.push(j); }
+      }
+    }
+    if (!open && ((nearA && nearB) || comp.length <= 6)) for (const i of comp) X[i] = X0[i];   // tiny crumbs too
+  }
+}
 function combineLayer(A, B, W, H, L, k, q, circles) {
   const N = W * H, op = L.op, sa = op === 'union' ? 1 : -1, sb = op === 'intersect' ? -1 : 1, so = op === 'union' ? 1 : -1;
   const chamfer = L.style === 'chamfer', contact = clamp(L.contact || 0, 0, 1);
@@ -1930,6 +1982,22 @@ function combineLayer(A, B, W, H, L, k, q, circles) {
   let X;
   if (op === 'union') { X = redistance(Sd.map(v => v - r), W, H); for (let i = 0; i < N; i++) X[i] += r; }   // closing
   else { X = redistance(Sd.map(v => v + r), W, H); for (let i = 0; i < N; i++) X[i] -= r; }                  // opening
+  if (!L.selfAffect) {
+    // Junction only. Every filled (union) or removed (subtract / intersect) pixel belongs to the
+    // nearest free ball of the closing / opening. Keep it only when that ball touches both the layers
+    // below (A) and this layer (B); a ball touching only one of them is filling that part's own
+    // notch (the inner V of an arrow) or rounding its own corner, which is left as it was.
+    const Bd = redistance(B, W, H), union = op === 'union';
+    const near = nearestSite(W, H, i => union ? Sd[i] >= r : Sd[i] <= -r);
+    const tol = Math.max(1.5, 0.04 * r);
+    const X0 = union ? Float32Array.from(X) : null;
+    for (let i = 0; i < N; i++) {
+      if (Math.abs(X[i] - S[i]) < 1e-3) continue;
+      const c = near[i];
+      if (c < 0 || Math.abs(Ad[c]) > r + tol || Math.abs(Bd[c]) > r + tol) X[i] = S[i];
+    }
+    if (union) refillPockets(X, X0, Ad, Bd, W, H);
+  }
   const E = new Float32Array(N), out = new Float32Array(N);
   for (let i = 0; i < N; i++) {
     // keep the fillet only near both edges (a ball touching both sits within 2r of each)
@@ -1966,15 +2034,36 @@ function findCircles(E, S, W, H, r, union, q, out) {
     }
   }
 }
+// Step cache: the combined field after each layer, keyed by everything that layer and the ones
+// below it depend on. Editing or moving a layer only recomputes from that layer up.
+let stepCache = new Map();
+function layerKey(L) {
+  const { name, visible, _otsu, ...rest } = L;
+  const c = imgCache.get(L.id);
+  return JSON.stringify(rest) + (c ? '#' + c.serial : '');
+}
 function cpuField(q, wantCircles) {
   const vis = visibleLayers(), circles = [];
-  let A = null, W = 0, H = 0, qq = q;
+  let A = null, W = 0, H = 0, qq = q, key = `q${q}|p${state.doc.profileOn !== false}`;
+  const next = new Map();
   for (const v of vis) {
+    key += '|' + layerKey(v.L);
+    const hit = stepCache.get(key);
+    if (hit) {
+      A = hit.A; W = hit.W; H = hit.H; qq = hit.q; circles.push(...hit.circles); next.set(key, hit);
+      continue;
+    }
     const F = renderLayerField(v, q);
     W = F.W; H = F.H; qq = F.q;
-    if (!A) { A = new Float32Array(W * H); if (v.L.op === 'union') A.set(F.g); else A.fill(1e5); continue; }
-    A = combineLayer(A, F.g, W, H, v.L, (v.L.k || 0) * qq, qq, wantCircles ? circles : null);
+    const mine = [];
+    if (!A) { A = new Float32Array(W * H); if (v.L.op === 'union') A.set(F.g); else A.fill(1e5); }
+    else A = combineLayer(A, F.g, W, H, v.L, (v.L.k || 0) * qq, qq, mine);
+    circles.push(...mine);
+    next.set(key, { A, W, H, q: qq, circles: mine });
   }
+  stepCache = next;   // keep only the current stack (memory)
+  if (!wantCircles) circles.length = 0;
+  A = A && Float32Array.from(A);  // the cached array must not be modified below
   if (!A) { const F = renderField(q); return F; }
   const iso = state.doc.iso * qq;
   if (iso) for (let i = 0; i < A.length; i++) A[i] -= iso;
@@ -2340,6 +2429,8 @@ function buildProps() {
   box.append(segRow('Blend style', [['round', 'Round'], ['chamfer', 'Chamfer']], () => L.style || 'round', v => L.style = v, () => { buildProps(); onLayerEdit(L); }));
   if ((L.style || 'round') === 'round' && state.doc.profileOn === false) box.append(h('div', { class: 'note' }, 'Layer Profile is off for all layers (Exact fillets panel). The value below is kept.'));
   if ((L.style || 'round') === 'round') add(sliderRow('Profile', () => L.profile || 0, v => L.profile = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: '0 = soft SDF blend, 1 = exact rolling ball fillet (radius 0.6 x Blend) at this layer junction. Computed on the grid, preview updates after each change' }));
+  if ((L.style || 'round') === 'round' && state.doc.profileOn !== false) box.append(checkRow('Self affect', () => !!L.selfAffect, v => L.selfAffect = v, () => onLayerEdit(L),
+    'Off: the fillet only touches the junction with the layers below, this layer\'s own notches (and theirs) stay as they are. On: the rolling ball also fills them when they are near the junction'));
   add(sliderRow('Contact only', () => L.contact || 0, v => L.contact = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: 'Less blend where surfaces face each other: no bridging between nearby shapes, blends only where they touch' }));
   add(sliderRow('Grow / shrink', () => L.grow, v => L.grow = v, { min: -Math.round(m * 0.1), max: Math.round(m * 0.1), step: 0.5, onInput: () => onLayerEdit(L), tip: 'Offset the surface (doc px)' }));
   if (L.type === 'text') buildTextProps(box, L, add);
