@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.4 (2026-11-09)
+- **PNG scale** in *Export* (1x / 2x / 4x, default 1x): the PNG is the document size times this scale. Before, it followed the *Curves* *Resolution* (2x by default), so a 2048 document gave a 4096 PNG and took about twice as long. *Resolution* is now only the contouring grid of the vector.
+
 ## 0.6.3 (2026-11-09)
 - **Export feedback**: *Export SVG* and *Export PNG* show a busy overlay with a spinner while they work (big PNGs and exact fillets can take a few seconds), the button is disabled until it finishes, and a toast confirms the saved file with its size and the time it took, or shows the error.
 
