@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.3 (2026-11-09)
+- **Export feedback**: *Export SVG* and *Export PNG* show a busy overlay with a spinner while they work (big PNGs and exact fillets can take a few seconds), the button is disabled until it finishes, and a toast confirms the saved file with its size and the time it took, or shows the error.
+
 ## 0.6.2 (2026-11-09)
 - **Line arrow**: *Arrow* is now a stroked arrow (shaft plus two head strokes, round caps) with *Length*, *Thickness*, *Head size* and *Head angle*. *Arrow style* switches to the filled *Block* arrow from 0.6.1; arrows in older project files stay *Block*.
 

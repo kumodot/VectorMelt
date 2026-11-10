@@ -26,7 +26,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ## Run it
 
 - **Online**: https://kumodot.github.io/VectorMelt/
-- **Local**: download the repo and double click `VectorMelt_v0.6.2.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
+- **Local**: download the repo and double click `VectorMelt_v0.6.3.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
 
 ## Workflow
 
@@ -91,7 +91,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ```
 index.html                 Pages entry: reads version.json, redirects to the versioned app
 version.json               current version + entry file
-VectorMelt_v0.6.2.html     the app (single file, no build step)
+VectorMelt_v0.6.3.html     the app (single file, no build step)
 assets/logo.svg            logo / favicon
 Samples/                   black and white test images
 screenshots/               README images and banner
