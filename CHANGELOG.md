@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.5 (2026-11-09)
+- **Fast edit** (Preview, on by default): while you drag a layer, the gizmo or a shape slider, or nudge with the arrows, the exact *Profile* / fillets are skipped and the live soft blend is shown. The exact result is rebuilt when you let go. On 8 layers with *Profile* 1 a preview update went from about 4 s to 0.16 s while dragging (software GPU in tests, much faster on a real one).
+- **Layer Profile** master switch (*Exact fillets* panel): turns *Profile* off for every layer at once, keeping each layer's value. Saved with the project. The layer panel shows a note while it is off.
+
 ## 0.6.4 (2026-11-09)
 - **PNG scale** in *Export* (1x / 2x / 4x, default 1x): the PNG is the document size times this scale. Before, it followed the *Curves* *Resolution* (2x by default), so a 2048 document gave a 4096 PNG and took about twice as long. *Resolution* is now only the contouring grid of the vector.
 

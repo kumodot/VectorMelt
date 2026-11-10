@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.6.4</title>
+<title>VectorMelt v0.6.5</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,10 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.6.5  Fast edit (Preview, on by default): while dragging a layer, the gizmo, a slider or nudging,
+         the exact Profile / fillets are skipped and the live soft blend is shown; rebuilt on
+         release. Layer Profile master switch (Exact fillets panel) turns Profile off for all
+         layers without losing their values (saved with the project).
   0.6.4  PNG scale (1x / 2x / 4x, default 1x) in Export: PNG size = document size x scale. It used to
          follow the Curves Resolution (2x by default), so a 2048 doc exported a 4096 PNG, slowly.
   0.6.3  Export feedback: SVG / PNG export shows a busy overlay with a spinner, the button is
@@ -272,7 +276,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
 
 <script>
 'use strict';
-const APP_VERSION = '0.6.4';
+const APP_VERSION = '0.6.5';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -283,7 +287,7 @@ console.log(`${APP_NAME} v${APP_VERSION}`);
    ========================================================================== */
 const state = {
   doc: { w: 1024, h: 1024, iso: 0, bg: '#141518', fg: '#f2f0ea', fillet: 0, roundR: 0 },
-  preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false, circles: true },
+  preview: { mode: 0, fillA: 0.85, vector: true, nodes: false, handles: false, circles: true, fastEdit: true },
   export: { quality: 2, tol: 0.35, corner: 45, minArea: 4, rings: 0, ringStep: 12, ringDir: 'out', ringsInSvg: true, ringStroke: 1, includeBg: false, pngTransparent: true, pngScale: 1, svgColor: '#000000' },
   ref: { asset: null, opacity: 0.5, visible: true, locked: true, x: 512, y: 512, scale: 1 },
   layers: [],
@@ -495,7 +499,7 @@ function visibleLayers() {
 // Layers whose blend needs field gradients (Contact only, or a Round profile above 0)
 function needs3pt(L) { return (L.contact || 0) > 0; }
 // Round layers with Profile > 0 get the exact rolling ball fillet, computed on the CPU grid
-function exactLayer(L) { return (L.style || 'round') === 'round' && (L.profile || 0) > 0 && (L.k || 0) > 0; }
+function exactLayer(L) { return state.doc.profileOn !== false && (L.style || 'round') === 'round' && (L.profile || 0) > 0 && (L.k || 0) > 0; }
 // Finite difference step for field gradients. A step tied to the largest fillet radius gives the
 // arc fillet a tangent "at the scale of the ball", so curved or rounded edges do not make it wobble.
 function gradStep(vis) {
@@ -1865,7 +1869,19 @@ function redistance(g, W, H) {
    on the grid, and the junction is closed (union) or opened (subtract / intersect) with
    exact distances, only near both edges. No edge directions involved, so no noise.
    ========================================================================== */
-function cpuActive() { return shapeProcActive() || visibleLayers().some(v => exactLayer(v.L)); }
+// Fast edit: while something is being dragged (layer, gizmo, slider, nudge) the exact Profile /
+// fillets are skipped, the live GPU soft blend is shown, and the exact result is rebuilt on release.
+let interacting = false;
+function fastNow() { return interacting && state.preview.fastEdit !== false; }
+function setInteracting(v) {
+  if (interacting === v) return;
+  interacting = v;
+  if (!v) { requestRender(); scheduleVector(); }
+}
+window.addEventListener('pointerup', () => setInteracting(false), true);
+window.addEventListener('pointercancel', () => setInteracting(false), true);
+window.addEventListener('blur', () => setInteracting(false));
+function cpuActive() { if (fastNow()) return false; return shapeProcActive() || visibleLayers().some(v => exactLayer(v.L)); }
 function renderLayerField(v, q) {
   const iso = state.doc.iso;
   visOverride = [{ L: Object.assign({}, v.L, { op: 'union', k: 0, contact: 0 }), tex: v.tex >= 0 ? 0 : -1 }];
@@ -2219,13 +2235,14 @@ function h(tag, attrs = {}, ...kids) {
 }
 function sliderRow(label, get, set, o = {}) {
   const { min = 0, max = 1, step = 0.01, onInput, tip } = o;
+  const heavy = !!onInput && onInput !== requestRender;   // only sliders that rebuild the shape trigger Fast edit
   const range = h('input', { type: 'range', min, max, step });
   const num = h('input', { type: 'number', step });
   const sync = () => { const v = get(); range.value = v; num.value = +(+v).toFixed(4); };
   sync();
   const apply = (v) => { if (!isFinite(v)) return; set(v); sync(); onInput && onInput(v); };
-  range.addEventListener('input', () => apply(+range.value));
-  range.addEventListener('change', commit);
+  range.addEventListener('input', () => { if (heavy) setInteracting(true); apply(+range.value); });
+  range.addEventListener('change', () => { setInteracting(false); commit(); });
   num.addEventListener('change', () => { apply(+num.value); commit(); });
   const row = h('div', { class: 'row', title: tip || '' }, h('label', {}, label), range, num);
   row.sync = sync;
@@ -2321,6 +2338,7 @@ function buildProps() {
   const add = (r) => { box.append(r); propRows.push(r); return r; };
   add(sliderRow('Blend', () => L.k, v => L.k = v, { min: 0, max: Math.round(m * 0.4), step: 1, onInput: () => onLayerEdit(L), tip: 'Metaball blend radius (doc px) against everything below this layer' }));
   box.append(segRow('Blend style', [['round', 'Round'], ['chamfer', 'Chamfer']], () => L.style || 'round', v => L.style = v, () => { buildProps(); onLayerEdit(L); }));
+  if ((L.style || 'round') === 'round' && state.doc.profileOn === false) box.append(h('div', { class: 'note' }, 'Layer Profile is off for all layers (Exact fillets panel). The value below is kept.'));
   if ((L.style || 'round') === 'round') add(sliderRow('Profile', () => L.profile || 0, v => L.profile = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: '0 = soft SDF blend, 1 = exact rolling ball fillet (radius 0.6 x Blend) at this layer junction. Computed on the grid, preview updates after each change' }));
   add(sliderRow('Contact only', () => L.contact || 0, v => L.contact = v, { min: 0, max: 1, step: 0.01, onInput: () => onLayerEdit(L), tip: 'Less blend where surfaces face each other: no bridging between nearby shapes, blends only where they touch' }));
   add(sliderRow('Grow / shrink', () => L.grow, v => L.grow = v, { min: -Math.round(m * 0.1), max: Math.round(m * 0.1), step: 0.5, onInput: () => onLayerEdit(L), tip: 'Offset the surface (doc px)' }));
@@ -2394,6 +2412,7 @@ function buildPreviewPanel() {
   box.append(checkRow('Show nodes', () => p.nodes, v => p.nodes = v, scheduleVector, 'White = smooth node, orange = corner'));
   box.append(checkRow('Show handles', () => p.handles, v => p.handles = v, scheduleVector, 'Bezier control handles'));
   box.append(checkRow('Fillet circles', () => p.circles, v => p.circles = v, scheduleVector, 'Construction circles of the exact Profile fillets (ball, centre, tangent points)'));
+  box.append(checkRow('Fast edit', () => p.fastEdit !== false, v => p.fastEdit = v, null, 'While dragging a layer, the gizmo or a slider, show the quick soft blend and skip the exact Profile / fillets. They are rebuilt when you let go'));
 }
 function buildDocPanel() {
   const box = $('docCtl'), d = state.doc; box.innerHTML = '';
@@ -2409,6 +2428,8 @@ function buildDocPanel() {
 function buildFilletPanel() {
   const box = $('filletCtl'), d = state.doc; box.innerHTML = '';
   const live = () => { requestRender(); scheduleVector(); };
+  box.append(checkRow('Layer Profile', () => d.profileOn !== false, v => d.profileOn = v, () => { buildProps(); live(); },
+    'Master switch for the exact Profile of every layer. Off keeps each layer value but uses the plain soft blend everywhere (much lighter)'));
   const m = Math.round(Math.max(d.w, d.h) * 0.15);
   box.append(sliderRow('Inner fillet', () => d.fillet || 0, v => d.fillet = v, { min: 0, max: m, step: 0.5, onInput: live, tip: 'Rolling ball radius (doc px) for every concave corner of the final shape. Exact circles on any input' }));
   box.append(sliderRow('Outer round', () => d.roundR || 0, v => d.roundR = v, { min: 0, max: m, step: 0.5, onInput: live, tip: 'Radius (doc px) for every convex corner of the final shape' }));
@@ -2509,6 +2530,7 @@ viewportEl.addEventListener('pointerdown', (e) => {
 });
 viewportEl.addEventListener('pointermove', (e) => {
   const p = evtDoc(e);
+  if (dragging && dragging.kind !== 'pan' && dragging.kind !== 'box' && dragging.kind !== 'ref') setInteracting(true);
   if (!dragging) {
     const sel = selectedLayers(); let cur = 'default';
     const mod = e.shiftKey || e.ctrlKey || e.metaKey;
@@ -2612,7 +2634,7 @@ window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') S.x -= st; if (e.key === 'ArrowRight') S.x += st;
       if (e.key === 'ArrowUp') S.y -= st; if (e.key === 'ArrowDown') S.y += st;
     }
-    e.preventDefault(); syncProps(); requestRender(); scheduleVector(); clearTimeout(nudgeTimer); nudgeTimer = setTimeout(commit, 300);
+    e.preventDefault(); syncProps(); requestRender(); scheduleVector(); clearTimeout(nudgeTimer); setInteracting(true); nudgeTimer = setTimeout(() => { setInteracting(false); commit(); }, 300);
   }
 });
 let nudgeTimer = null;

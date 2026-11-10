@@ -9,11 +9,11 @@
 <style>html,body{margin:0;height:100%;background:#141518;color:#8b9099;font:14px system-ui,sans-serif;display:flex;align-items:center;justify-content:center}</style>
 </head>
 <body>
-<p>Loading VectorMelt... <a id="go" href="VectorMelt_v0.6.4.html" style="color:#4fb3ff">open it</a></p>
+<p>Loading VectorMelt... <a id="go" href="VectorMelt_v0.6.5.html" style="color:#4fb3ff">open it</a></p>
 <script>
 // Redirect to the current versioned build listed in version.json (fallback: the build below).
 (function () {
-  var FALLBACK = 'VectorMelt_v0.6.4.html';
+  var FALLBACK = 'VectorMelt_v0.6.5.html';
   var go = function (entry) { location.replace((entry || FALLBACK) + location.search + location.hash); };
   if (location.protocol === 'file:') { go(FALLBACK); return; }
   fetch('version.json', { cache: 'no-store' })
