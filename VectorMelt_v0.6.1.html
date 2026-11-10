@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.6.0</title>
+<title>VectorMelt v0.6.1</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,11 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.6.1  Multi selection: Shift / Ctrl click (canvas or list), box select by dragging on empty
+         canvas, Ctrl+A. Move, nudge, scale and rotate (around the group centre), duplicate and
+         delete act on every selected layer. Shift while moving locks the axis. Right drag pans.
+         New exact SDF shapes: Triangle, Cross, Arrow (rounded convex corners by inset + offset).
+         Shape buttons are icons now. Box starts square.
   0.6.0  Profile is now an exact rolling ball fillet at each layer junction (CPU grid pipeline:
          every layer field rendered on the GPU, combined on the grid, junction closed / opened
          with exact distances). The old per pixel arc (noisy on text) is gone. Construction
@@ -51,7 +56,7 @@
   0.1.0  First version.
          - Image layers: Otsu or manual threshold, auto invert, real signed EDT + smoothing,
            or "Blur + Level" pseudo field mode.
-         - Shape layers: circle, ellipse, rounded box, capsule, star/polygon, ring.
+         - Shape layers: circle, ellipse, rounded box, capsule, star/polygon, ring, triangle, cross, arrow.
          - Per layer: Union / Subtract / Intersect with its own blend radius, grow/shrink,
            move / scale / rotate gizmo on canvas.
          - Reference image in the background with opacity, lock and transform.
@@ -96,6 +101,10 @@ h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;co
 h3 small{text-transform:none;letter-spacing:0;font-weight:400}
 .addgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .addgrid button{padding:5px 2px}
+.shapegrid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-bottom:4px}
+.shapegrid button{padding:4px 0;display:flex;align-items:center;justify-content:center}
+.shapegrid svg{width:18px;height:18px;fill:#c9ccd3}
+.shapegrid button:hover svg{fill:#fff}
 #layerList{flex:1;overflow-y:auto;border:1px solid var(--line);border-radius:5px;background:#18191d;min-height:80px}
 .lrow{display:flex;align-items:center;gap:6px;padding:5px 6px;border-bottom:1px solid #24262b;cursor:pointer;user-select:none}
 .lrow:hover{background:#22252a}
@@ -162,15 +171,20 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
   <aside id="left">
     <section>
       <h3>Add</h3>
+      <div class="shapegrid">
+        <button data-add="circle" title="Circle" aria-label="Circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+        <button data-add="ellipse" title="Ellipse" aria-label="Ellipse"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/></svg></button>
+        <button data-add="box" title="Box (square)" aria-label="Box (square)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></button>
+        <button data-add="capsule" title="Capsule" aria-label="Capsule"><svg viewBox="0 0 24 24"><rect x="2" y="7.5" width="20" height="9" rx="4.5"/></svg></button>
+        <button data-add="star" title="Star" aria-label="Star"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.8 6.1 6.6.7-4.9 4.5 1.4 6.6L12 17.1l-5.9 3.3 1.4-6.6-4.9-4.5 6.6-.7z"/></svg></button>
+        <button data-add="ring" title="Ring" aria-label="Ring"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 3a9 9 0 1 1 0 18a9 9 0 1 1 0-18zm0 4.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9z"/></svg></button>
+        <button data-add="triangle" title="Triangle" aria-label="Triangle"><svg viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/></svg></button>
+        <button data-add="cross" title="Cross" aria-label="Cross"><svg viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></button>
+        <button data-add="arrow" title="Arrow" aria-label="Arrow"><svg viewBox="0 0 24 24"><path d="M2 9.5h11V5l9 7-9 7v-4.5H2z"/></svg></button>
+      </div>
       <div class="addgrid">
         <button data-add="image" title="Black and white image or SVG (or drop files on the canvas)">Image</button>
         <button data-add="svg" title="SVG file, kept as a vector and rasterized at the layer Resolution">SVG</button>
-        <button data-add="circle">Circle</button>
-        <button data-add="ellipse">Ellipse</button>
-        <button data-add="box">Box</button>
-        <button data-add="capsule">Capsule</button>
-        <button data-add="star">Star</button>
-        <button data-add="ring">Ring</button>
  <button data-add="text" title="Text layer (local or Google fonts)">Text</button>
         <button data-add="reference" title="Background reference image (never part of the shape)">Ref</button>
       </div>
@@ -194,7 +208,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
   <div id="viewport">
     <canvas id="gl"></canvas>
     <canvas id="ov"></canvas>
-    <div id="hint">Drag: move | Corners: scale | Top dot: rotate (Shift snaps) | Wheel: zoom | Middle or Space drag: pan | F: fit | 1/2/3: preview mode | V: vector overlay</div>
+    <div id="hint">Shift/Ctrl click: multi select | Drag empty: box select | Ctrl+A: all | Corners: scale | Dot: rotate (Shift snaps) | Wheel: zoom | Middle/right/Space drag: pan | F: fit</div>
     <div id="legend"></div>
     <div id="dropMsg">Drop images to add layers (.vmelt to open a project)</div>
   </div>
@@ -215,12 +229,16 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
     <p><a href="https://ko-fi.com/msouza3d" target="_blank" rel="noopener">Support Marcelo Souza on Ko-fi</a></p>
     <table class="keys">
       <tr><td><kbd>Wheel</kbd></td><td>Zoom at cursor</td></tr>
-      <tr><td><kbd>Middle drag</kbd> / <kbd>Space</kbd> + drag</td><td>Pan</td></tr>
+      <tr><td><kbd>Middle drag</kbd> / <kbd>Right drag</kbd> / <kbd>Space</kbd> + drag</td><td>Pan</td></tr>
+      <tr><td><kbd>Shift</kbd> / <kbd>Ctrl</kbd> + click</td><td>Add to / remove from selection</td></tr>
+      <tr><td>Drag on empty canvas</td><td>Box select (<kbd>Shift</kbd> adds)</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd> / <kbd>Esc</kbd></td><td>Select all / clear selection</td></tr>
+      <tr><td><kbd>Shift</kbd> while moving</td><td>Lock to one axis</td></tr>
       <tr><td><kbd>F</kbd></td><td>Fit document</td></tr>
       <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Fill / Outline / Field preview</td></tr>
       <tr><td><kbd>V</kbd></td><td>Vector overlay</td></tr>
-      <tr><td><kbd>Arrows</kbd> (<kbd>Shift</kbd> x10)</td><td>Nudge layer</td></tr>
-      <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd> / <kbd>Del</kbd></td><td>Duplicate / delete layer</td></tr>
+      <tr><td><kbd>Arrows</kbd> (<kbd>Shift</kbd> x10)</td><td>Nudge selected layers</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd> / <kbd>Del</kbd></td><td>Duplicate / delete selected layers</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Undo / redo</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save project</td></tr>
     </table>
@@ -234,7 +252,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
 
 <script>
 'use strict';
-const APP_VERSION = '0.6.0';
+const APP_VERSION = '0.6.1';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -256,7 +274,7 @@ const imgCache = new Map(); // layer id -> {key, W, H, sc, data, tex}
 let idCounter = 1;
 const uid = () => 'L' + (Date.now().toString(36)) + (idCounter++);
 
-const TYPE_LABEL = { image: 'Image', text: 'Text', circle: 'Circle', ellipse: 'Ellipse', box: 'Box', capsule: 'Capsule', star: 'Star', ring: 'Ring' };
+const TYPE_LABEL = { image: 'Image', text: 'Text', circle: 'Circle', ellipse: 'Ellipse', box: 'Box', capsule: 'Capsule', star: 'Star', ring: 'Ring', triangle: 'Triangle', cross: 'Cross', arrow: 'Arrow' };
 const SHAPE_PARAMS = {
   circle:  [['r', 'Radius', 1, 1000, 1]],
   ellipse: [['rx', 'Radius X', 1, 1000, 1], ['ry', 'Radius Y', 1, 1000, 1]],
@@ -264,6 +282,9 @@ const SHAPE_PARAMS = {
   capsule: [['len', 'Length', 0, 2000, 1], ['r', 'Radius', 1, 500, 1]],
   star:    [['n', 'Points', 3, 24, 1], ['r', 'Radius', 1, 1000, 1], ['sharp', 'Sharpness', 0, 1, 0.01]],
   ring:    [['r', 'Radius', 1, 1000, 1], ['t', 'Thickness', 1, 500, 1]],
+  triangle:[['w', 'Width', 1, 2000, 1], ['h', 'Height', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
+  cross:   [['size', 'Size', 1, 2000, 1], ['t', 'Arm thickness', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
+  arrow:   [['len', 'Length', 1, 2000, 1], ['sw', 'Shaft width', 1, 1000, 1], ['hw', 'Head width', 1, 2000, 1], ['hl', 'Head length', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
 };
 
 const $ = (id) => document.getElementById(id);
@@ -341,6 +362,51 @@ float sdStar(vec2 p, float r, float n, float m){
   return length(p)*sign(p.x);
 }
 float sdRing(vec2 p, float r, float t){ return abs(length(p) - r) - t*0.5; }
+// Exact triangle (iq). Rounded corners = inset the triangle towards its incenter, then offset by rr,
+// so the straight edges stay where they were and only the convex corners turn into arcs.
+float sdTri(vec2 p, vec2 p0, vec2 p1, vec2 p2){
+  vec2 e0 = p1 - p0, e1 = p2 - p1, e2 = p0 - p2;
+  vec2 v0 = p - p0, v1 = p - p1, v2 = p - p2;
+  vec2 pq0 = v0 - e0*clamp(dot(v0, e0)/dot(e0, e0), 0.0, 1.0);
+  vec2 pq1 = v1 - e1*clamp(dot(v1, e1)/dot(e1, e1), 0.0, 1.0);
+  vec2 pq2 = v2 - e2*clamp(dot(v2, e2)/dot(e2, e2), 0.0, 1.0);
+  float s = sign(e0.x*e2.y - e0.y*e2.x);
+  vec2 d = min(min(vec2(dot(pq0, pq0), s*(v0.x*e0.y - v0.y*e0.x)),
+                   vec2(dot(pq1, pq1), s*(v1.x*e1.y - v1.y*e1.x))),
+                   vec2(dot(pq2, pq2), s*(v2.x*e2.y - v2.y*e2.x)));
+  return -sqrt(d.x)*sign(d.y);
+}
+float sdTriangle(vec2 p, vec3 q){
+  float bx = max(q.x, 1e-3), by = max(q.y, 1e-3);
+  float inr = 2.0*bx*by/(sqrt(bx*bx + 4.0*by*by) + bx);
+  float rr = clamp(q.z, 0.0, inr*0.999), f = (inr - rr)/inr;
+  vec2 ic = vec2(0.0, by - inr);
+  return sdTri(p, ic + (vec2(0.0, -by) - ic)*f, ic + (vec2(bx, by) - ic)*f, ic + (vec2(-bx, by) - ic)*f) - rr;
+}
+// Exact plus sign (iq sdCross with r = 0). q.x half size, q.y half arm thickness.
+float sdCross(vec2 p, vec3 q){
+  float rr = clamp(q.z, 0.0, q.y*0.999);
+  vec2 b = vec2(q.x, min(q.y, q.x)) - rr;
+  p = abs(p); p = (p.y > p.x) ? p.yx : p.xy;
+  vec2 v = p - b; float k = max(v.y, v.x);
+  vec2 w = (k > 0.0) ? v : vec2(b.y - p.x, -k);
+  return sign(k)*length(max(w, 0.0)) - rr;
+}
+float sdSeg(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; return length(pa - ba*clamp(dot(pa, ba)/dot(ba, ba), 0.0, 1.0)); }
+// Arrow pointing +x. q = (half length, shaft half width, head half width, head length), rr = corner radius.
+// The polygon is inset by rr edge by edge, then offset back, so only convex corners get rounded.
+float sdArrow(vec2 p, vec4 q, float rr){
+  p.y = abs(p.y);
+  float hl = clamp(q.w, 1e-3, 2.0*q.x), hw = max(q.z, 1e-3), sw = min(q.y, hw);
+  float hyp = sqrt(hl*hl + hw*hw), ca = hl/hyp, sa = hw/hyp;
+  rr = clamp(rr, 0.0, min(sw*0.999, 0.999*hl*sa/(1.0 + sa)));
+  float xb = -q.x + rr, ys = sw - rr, xh = q.x - hl + rr, xt = q.x - rr/sa;
+  float yd = max(hw*(q.x - xh)/hl - rr/ca, ys);
+  float d = min(min(sdSeg(p, vec2(xb, 0.0), vec2(xb, ys)), sdSeg(p, vec2(xb, ys), vec2(xh, ys))),
+                min(sdSeg(p, vec2(xh, ys), vec2(xh, yd)), sdSeg(p, vec2(xh, yd), vec2(xt, 0.0))));
+  bool inside = (p.x >= xb && p.x <= xh && p.y <= ys) || (p.x >= xh && p.x <= xt && p.y <= yd*(xt - p.x)/max(xt - xh, 1e-4));
+  return (inside ? -d : d) - rr;
+}
 // Catmull-Rom (C1) sampling: smooth gradients matter for the arc fillet, bilinear made them
 // piecewise constant per texel and the fillets came out jagged on image / text layers.
 float crw(float p0, float p1, float p2, float p3, float t){
@@ -374,6 +440,9 @@ function shapeExpr(L, i, texIdx) {
     case 'capsule': return `sdCapsule(l, ${q}.x, ${q}.y)`;
     case 'star': return `sdStar(l, ${q}.x, ${q}.y, ${q}.z)`;
     case 'ring': return `sdRing(l, ${q}.x, ${q}.y)`;
+    case 'triangle': return `sdTriangle(l, ${q}.xyz)`;
+    case 'cross': return `sdCross(l, ${q}.xyz)`;
+    case 'arrow': return `sdArrow(l, ${q}, uP[${i}].w)`;
     case 'image': case 'text': return `sampleSDF(uTex${texIdx}, ${q}.xy, l)`;
   }
   return '1e5';
@@ -560,6 +629,9 @@ function layerUniforms(L) {
     case 'capsule': Q = [L.len / 2, L.r, 0, 0]; break;
     case 'star': { const n = Math.round(L.n); Q = [L.r, n, 2 + (1 - L.sharp) * (n - 2), 0]; break; }
     case 'ring': Q = [L.r, L.t, 0, 0]; break;
+    case 'triangle': Q = [L.w / 2, L.h / 2, L.round, 0]; break;
+    case 'cross': Q = [L.size / 2, L.t / 2, L.round, 0]; break;
+    case 'arrow': Q = [L.len / 2, L.sw / 2, L.hw / 2, L.hl]; break;
     case 'image': case 'text': {
       const c = imgCache.get(L.id);
       if (c) { Q = [c.W, c.H, 0, 0]; scale = Math.max(1e-4, L.scale / c.sc); } else Q = [1, 1, 0, 0];
@@ -567,7 +639,7 @@ function layerUniforms(L) {
     }
   }
   const B = [L.style === 'chamfer' ? 1 : 0, 0, clamp(L.contact || 0, 0, 1), 0]; // profile is exact, on the CPU grid
-  return { T, P: [scale, L.grow || 0, Math.max(0, L.k || 0), 0], Q, B };
+  return { T, P: [scale, L.grow || 0, Math.max(0, L.k || 0), L.type === 'arrow' ? (L.round || 0) : 0], Q, B };
 }
 
 function setCommonUniforms(resW, resH, view, mode) {
@@ -1126,17 +1198,20 @@ function makeShape(type) {
   switch (type) {
     case 'circle': L.r = r; break;
     case 'ellipse': L.rx = Math.round(r * 1.5); L.ry = Math.round(r * 0.8); break;
-    case 'box': L.w = r * 2; L.h = Math.round(r * 1.4); L.round = Math.round(r * 0.15); break;
+    case 'box': L.w = r * 2; L.h = r * 2; L.round = Math.round(r * 0.15); break;
     case 'capsule': L.len = r * 2; L.r = Math.round(r * 0.45); break;
     case 'star': L.n = 5; L.r = r; L.sharp = 0.55; break;
     case 'ring': L.r = r; L.t = Math.round(r * 0.35); break;
+    case 'triangle': L.w = r * 2; L.h = Math.round(r * 2 * 0.866); L.round = Math.round(r * 0.08); break;
+    case 'cross': L.size = r * 2; L.t = Math.round(r * 0.6); L.round = Math.round(r * 0.05); break;
+    case 'arrow': L.len = Math.round(r * 2.6); L.sw = Math.round(r * 0.5); L.hw = Math.round(r * 1.3); L.hl = Math.round(r * 0.9); L.round = Math.round(r * 0.04); break;
   }
   return L;
 }
 function addLayer(L) {
   const i = state.selected ? state.layers.findIndex(l => l.id === state.selected) : -1;
   if (i >= 0) state.layers.splice(i + 1, 0, L); else state.layers.push(L);
-  state.selected = L.id;
+  state.selected = L.id; multiSel.clear(); multiSel.add(L.id);
   if (isRaster(L)) processImage(L);
   layersChanged(); commit();
 }
@@ -1203,6 +1278,7 @@ function setReferenceAsset(key, fit) {
 }
 function selectedLayer() { return state.layers.find(l => l.id === state.selected) || null; }
 function layersChanged() {
+  for (const id of [...multiSel]) if (!state.layers.some(l => l.id === id)) multiSel.delete(id);
   processAllImages();
   // drop caches of deleted layers
   for (const id of [...imgCache.keys()]) if (!state.layers.some(l => l.id === id)) { const c = imgCache.get(id); if (c.tex) gl.deleteTexture(c.tex); imgCache.delete(id); }
@@ -1224,6 +1300,48 @@ function sdStarJS(x, y, r, n, m) {
   px += ecx * t; py += ecy * t;
   return Math.hypot(px, py) * Math.sign(px);
 }
+function segDistJS(px, py, ax, ay, bx, by) {
+  const pax = px - ax, pay = py - ay, bax = bx - ax, bay = by - ay;
+  const t = clamp((pax * bax + pay * bay) / (bax * bax + bay * bay || 1e-9), 0, 1);
+  return Math.hypot(pax - bax * t, pay - bay * t);
+}
+function triDistJS(px, py, P) {
+  // exact signed distance to a triangle P = [[x,y] x3]
+  let dmin = Infinity, inside = true, sgn0 = 0;
+  for (let i = 0; i < 3; i++) {
+    const [ax, ay] = P[i], [bx, by] = P[(i + 1) % 3];
+    dmin = Math.min(dmin, segDistJS(px, py, ax, ay, bx, by));
+    const cr = (bx - ax) * (py - ay) - (by - ay) * (px - ax);
+    if (cr !== 0) { const sg = Math.sign(cr); if (!sgn0) sgn0 = sg; else if (sg !== sgn0) inside = false; }
+  }
+  return inside ? -dmin : dmin;
+}
+function sdTriangleJS(x, y, bx, by, round) {
+  bx = Math.max(bx, 1e-3); by = Math.max(by, 1e-3);
+  const inr = 2 * bx * by / (Math.hypot(bx, 2 * by) + bx);
+  const rr = clamp(round, 0, inr * 0.999), f = (inr - rr) / inr, icy = by - inr;
+  const P = [[0, -by], [bx, by], [-bx, by]].map(([vx, vy]) => [vx * f, icy + (vy - icy) * f]);
+  return triDistJS(x, y, P) - rr;
+}
+function sdCrossJS(x, y, hs, ht, round) {
+  const rr = clamp(round, 0, ht * 0.999);
+  const bx = hs - rr, by = Math.min(ht, hs) - rr;
+  let px = Math.abs(x), py = Math.abs(y); if (py > px) [px, py] = [py, px];
+  const vx = px - bx, vy = py - by, k = Math.max(vx, vy);
+  const wx = k > 0 ? vx : by - px, wy = k > 0 ? vy : -k;
+  return Math.sign(k) * Math.hypot(Math.max(wx, 0), Math.max(wy, 0)) - rr;
+}
+function sdArrowJS(x, y, Q, rr) {
+  y = Math.abs(y);
+  const hl = clamp(Q[3], 1e-3, 2 * Q[0]), hw = Math.max(Q[2], 1e-3), sw = Math.min(Q[1], hw);
+  const hyp = Math.hypot(hl, hw), ca = hl / hyp, sa = hw / hyp;
+  rr = clamp(rr, 0, Math.min(sw * 0.999, 0.999 * hl * sa / (1 + sa)));
+  const xb = -Q[0] + rr, ys = sw - rr, xh = Q[0] - hl + rr, xt = Q[0] - rr / sa;
+  const yd = Math.max(hw * (Q[0] - xh) / hl - rr / ca, ys);
+  const d = Math.min(segDistJS(x, y, xb, 0, xb, ys), segDistJS(x, y, xb, ys, xh, ys), segDistJS(x, y, xh, ys, xh, yd), segDistJS(x, y, xh, yd, xt, 0));
+  const inside = (x >= xb && x <= xh && y <= ys) || (x >= xh && x <= xt && y <= yd * (xt - x) / Math.max(xt - xh, 1e-4));
+  return (inside ? -d : d) - rr;
+}
 function layerDist(L, X, Y) {
   const th = (L.rot || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
   const u = layerUniforms(L), sc = u.P[0], Q = u.Q;
@@ -1237,6 +1355,9 @@ function layerDist(L, X, Y) {
     case 'capsule': { let ax = Math.abs(x); ax -= clamp(ax, 0, Q[0]); d = Math.hypot(ax, y) - Q[1]; break; }
     case 'star': d = sdStarJS(x, y, Q[0], Q[1], Q[2]); break;
     case 'ring': d = Math.abs(Math.hypot(x, y) - Q[0]) - Q[1] / 2; break;
+    case 'triangle': d = sdTriangleJS(x, y, Q[0], Q[1], Q[2]); break;
+    case 'cross': d = sdCrossJS(x, y, Q[0], Q[1], Q[2]); break;
+    case 'arrow': d = sdArrowJS(x, y, Q, u.P[3]); break;
     case 'image': case 'text': {
       const cch = imgCache.get(L.id); if (!cch) return 1e9;
       const W = cch.W, H = cch.H;
@@ -1262,6 +1383,9 @@ function layerHalfExtents(L) {
     case 'capsule': return [(L.len / 2 + L.r) * s, L.r * s];
     case 'star': return [L.r * s, L.r * s];
     case 'ring': return [(L.r + L.t / 2) * s, (L.r + L.t / 2) * s];
+    case 'triangle': return [L.w / 2 * s, L.h / 2 * s];
+    case 'cross': return [L.size / 2 * s, L.size / 2 * s];
+    case 'arrow': return [L.len / 2 * s, Math.max(L.hw, L.sw) / 2 * s];
     case 'image': case 'text': { const a = rasterSource(L); return a ? [a.w * s / 2, a.h * s / 2] : [10, 10]; }
   }
   return [10, 10];
@@ -1292,6 +1416,19 @@ function gizmoHandles(L) {
   const off = 26 * dpr;
   const rot = [top[0] + Math.sin(th) * off, top[1] - Math.cos(th) * off];
   return { corners: cs, top, rot };
+}
+// Group gizmo: axis aligned box around every selected layer, corners scale the group, the top
+// dot rotates it, both around the group centre.
+function groupBox(list) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const L of list) for (const [x, y] of layerCorners(L, 0)) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  return { x0, y0, x1, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+function groupHandles(list) {
+  const b = groupBox(list);
+  const corners = [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]].map(p => docToScreen(p[0], p[1]));
+  const top = [(corners[0][0] + corners[1][0]) / 2, corners[0][1]];
+  return { box: b, corners, top, rot: [top[0], top[1] - 26 * dpr], center: docToScreen(b.cx, b.cy) };
 }
 let legendKey = '';
 function updateLegend() {
@@ -1373,7 +1510,32 @@ function drawOverlay() {
     }
   }
   // gizmo
-  const L = selectedLayer();
+  const sel = selectedLayers();
+  if (sel.length > 1) {
+    ov.lineWidth = 1 * dpr;
+    for (const S of sel) {
+      const cs = layerCorners(S, 0).map(p => docToScreen(p[0], p[1]));
+      ov.strokeStyle = 'rgba(111,208,140,0.6)'; ov.setLineDash([3 * dpr, 3 * dpr]);
+      ov.beginPath(); cs.forEach((p, i) => i ? ov.lineTo(p[0], p[1]) : ov.moveTo(p[0], p[1])); ov.closePath(); ov.stroke();
+    }
+    ov.setLineDash([]);
+    const g = groupHandles(sel);
+    ov.strokeStyle = '#6fd08c';
+    ov.beginPath(); g.corners.forEach((p, i) => i ? ov.lineTo(p[0], p[1]) : ov.moveTo(p[0], p[1])); ov.closePath(); ov.stroke();
+    ov.beginPath(); ov.moveTo(g.top[0], g.top[1]); ov.lineTo(g.rot[0], g.rot[1]); ov.stroke();
+    ov.fillStyle = '#fff'; const hs = 4 * dpr;
+    for (const p of g.corners) { ov.fillRect(p[0] - hs, p[1] - hs, 2 * hs, 2 * hs); ov.strokeRect(p[0] - hs, p[1] - hs, 2 * hs, 2 * hs); }
+    ov.beginPath(); ov.arc(g.rot[0], g.rot[1], 5 * dpr, 0, Math.PI * 2); ov.fill(); ov.stroke();
+    ov.fillStyle = '#6fd08c'; ov.font = `${11 * dpr}px system-ui, sans-serif`;
+    ov.fillText(`${sel.length} layers`, g.corners[0][0], g.corners[0][1] - 6 * dpr);
+  }
+  if (dragging && dragging.kind === 'box') {
+    const D = dragging, [ax, ay] = docToScreen(D.x0, D.y0), [bx, by] = docToScreen(D.x1, D.y1);
+    ov.strokeStyle = '#4fb3ff'; ov.fillStyle = 'rgba(79,179,255,0.08)'; ov.lineWidth = 1 * dpr; ov.setLineDash([4 * dpr, 3 * dpr]);
+    ov.fillRect(Math.min(ax, bx), Math.min(ay, by), Math.abs(bx - ax), Math.abs(by - ay));
+    ov.strokeRect(Math.min(ax, bx), Math.min(ay, by), Math.abs(bx - ax), Math.abs(by - ay)); ov.setLineDash([]);
+  }
+  const L = sel.length === 1 ? sel[0] : null;
   if (L) {
     const g = gizmoHandles(L);
     ov.lineWidth = 1 * dpr;
@@ -1929,7 +2091,7 @@ function commit() {
 }
 function restore(s) {
   const o = JSON.parse(s);
-  state.doc = o.doc; state.ref = o.ref; state.layers = o.layers; state.selected = o.selected;
+  state.doc = o.doc; state.ref = o.ref; state.layers = o.layers; state.selected = o.selected; if (!multiSel.has(o.selected)) multiSel.clear();
   processAllImages();
   layersChanged(); buildDocPanel(); buildRefPanel(); buildFilletPanel();
 }
@@ -1955,7 +2117,7 @@ async function loadProjectText(text) {
   imgCache.clear();
   Object.assign(state.doc, p.doc); Object.assign(state.preview, p.preview || {}); Object.assign(state.export, p.export || {});
   state.ref = Object.assign({ asset: null, opacity: 0.5, visible: true, locked: true, x: 0, y: 0, scale: 1 }, p.ref || {});
-  state.layers = p.layers || []; state.selected = null;
+  state.layers = p.layers || []; state.selected = null; multiSel.clear();
   if (p.name) $('projName').value = p.name;
   processAllImages();
   undoHist.length = 0; histIndex = -1; commit();
@@ -1966,7 +2128,7 @@ function newProject() {
   if (state.layers.length && !confirm('Start a new project? Unsaved changes are lost.')) return;
   for (const c of imgCache.values()) if (c.tex) gl.deleteTexture(c.tex);
   imgCache.clear();
-  state.layers = []; state.selected = null;
+  state.layers = []; state.selected = null; multiSel.clear();
   state.ref = { asset: null, opacity: 0.5, visible: true, locked: true, x: state.doc.w / 2, y: state.doc.h / 2, scale: 1 };
   $('projName').value = 'vectormelt';
   undoHist.length = 0; histIndex = -1; commit();
@@ -2038,12 +2200,35 @@ function buildLayerList() {
     const eye = h('span', { class: 'eye' + (L.visible ? '' : ' off'), title: 'Toggle visibility', onclick: (e) => { e.stopPropagation(); L.visible = !L.visible; layersChanged(); commit(); } }, L.visible ? '◉' : '○');
     const opLetter = L.op === 'subtract' ? 'S' : L.op === 'intersect' ? 'I' : 'U';
     const op = h('span', { class: 'op op-' + L.op, title: L.op + ' (click to cycle)', onclick: (e) => { e.stopPropagation(); L.op = L.op === 'union' ? 'subtract' : L.op === 'subtract' ? 'intersect' : 'union'; layersChanged(); commit(); } }, opLetter);
-    const row = h('div', { class: 'lrow' + (L.id === state.selected ? ' sel' : ''), onclick: () => select(L.id) }, eye, op, h('span', { class: 'nm' }, L.name), h('span', { class: 'ty' }, TYPE_LABEL[L.type]));
+    const row = h('div', { class: 'lrow' + (L.id === state.selected || multiSel.has(L.id) ? ' sel' : ''), onclick: (e) => select(L.id, e.shiftKey || e.ctrlKey || e.metaKey ? 'toggle' : 'replace') }, eye, op, h('span', { class: 'nm' }, L.name), h('span', { class: 'ty' }, TYPE_LABEL[L.type]));
     list.append(row);
   }
 }
-function select(id) {
+// Multi selection: multiSel holds every selected layer id, state.selected is the primary
+// (last clicked) one whose properties the panel shows.
+const multiSel = new Set();
+function selectedLayers() {
+  const out = state.layers.filter(l => multiSel.has(l.id));
+  if (!out.length) { const L = selectedLayer(); if (L) out.push(L); }
+  return out;
+}
+function select(id, mode = 'replace') {
+  if (mode === 'toggle' && id && id !== '__ref') {
+    if (multiSel.has(id)) { multiSel.delete(id); id = [...multiSel].pop() || null; }
+    else { if (state.selected && state.selected !== '__ref' && !multiSel.size) multiSel.add(state.selected); multiSel.add(id); }
+  } else if (mode === 'add' && id && id !== '__ref') {
+    multiSel.add(id);
+  } else {
+    multiSel.clear();
+    if (id && id !== '__ref') multiSel.add(id);
+  }
   state.selected = id; buildLayerList(); buildProps(); buildRefPanel(); requestRender();
+}
+function selectMany(ids, add) {
+  if (!add) multiSel.clear();
+  for (const id of ids) multiSel.add(id);
+  state.selected = ids.length ? ids[ids.length - 1] : (add ? state.selected : null);
+  buildLayerList(); buildProps(); buildRefPanel(); requestRender();
 }
 
 /* Properties */
@@ -2056,6 +2241,8 @@ function buildProps() {
   const box = $('props'); box.innerHTML = ''; propRows = [];
   const L = selectedLayer();
   if (!L) { box.append(h('div', { class: 'note' }, 'Select a layer (click it in the list or on the canvas).')); return; }
+  const nSel = selectedLayers().length;
+  if (nSel > 1) box.append(h('div', { class: 'note' }, `${nSel} layers selected: drag, nudge, scale, rotate, duplicate and delete act on all of them. The settings below are for "${L.name}" only.`));
   const name = h('input', { type: 'text', class: 'grow', value: L.name });
   name.addEventListener('input', () => { L.name = name.value; buildLayerListSoon(); });
   name.addEventListener('change', commit);
@@ -2195,58 +2382,78 @@ function hitTest(x, y) {
   }
   return null;
 }
+function hitHandle(p, handles) {
+  const R = 8 * dpr;
+  if (Math.hypot(p.sx - handles.rot[0], p.sy - handles.rot[1]) < R) return 'rot';
+  if (handles.corners.some(c => Math.hypot(p.sx - c[0], p.sy - c[1]) < R)) return 'scale';
+  return null;
+}
+// Snapshot of every selected layer so group drags are applied from the start state (no drift).
+function snapItems(list) { return list.map(L => ({ L, x: L.x, y: L.y, rot: L.rot || 0, scale: L.scale })); }
 viewportEl.addEventListener('pointerdown', (e) => {
   viewportEl.setPointerCapture(e.pointerId);
   const p = evtDoc(e);
-  if (e.button === 1 || (e.button === 0 && spaceDown)) { dragging = { kind: 'pan', sx: p.sx, sy: p.sy, ox: view.ox, oy: view.oy }; e.preventDefault(); return; }
+  if (e.button === 1 || e.button === 2 || (e.button === 0 && spaceDown)) { dragging = { kind: 'pan', sx: p.sx, sy: p.sy, ox: view.ox, oy: view.oy }; e.preventDefault(); return; }
   if (e.button !== 0) return;
-  const L = selectedLayer();
-  if (L) {
-    const g = gizmoHandles(L), R = 8 * dpr;
-    if (Math.hypot(p.sx - g.rot[0], p.sy - g.rot[1]) < R) {
-      const [cx, cy] = docToScreen(L.x, L.y);
-      dragging = { kind: 'rot', L, a0: Math.atan2(p.sy - cy, p.sx - cx), r0: L.rot };
-      return;
-    }
-    for (const c of g.corners) if (Math.hypot(p.sx - c[0], p.sy - c[1]) < R) {
-      const [cx, cy] = docToScreen(L.x, L.y);
-      dragging = { kind: 'scale', L, d0: Math.hypot(p.sx - cx, p.sy - cy) || 1, s0: L.scale };
+  const mod = e.shiftKey || e.ctrlKey || e.metaKey;
+  const sel = selectedLayers();
+  if (sel.length > 1 && !mod) {
+    const g = groupHandles(sel), kind = hitHandle(p, g);
+    if (kind) {
+      const [cx, cy] = g.center;
+      dragging = { kind: 'g' + kind, items: snapItems(sel), cx: g.box.cx, cy: g.box.cy,
+        a0: Math.atan2(p.sy - cy, p.sx - cx), d0: Math.hypot(p.sx - cx, p.sy - cy) || 1 };
       return;
     }
   }
-  const hit = hitTest(p.x, p.y);
-  let target = hit;
-  if (!target && L && pointInLayerBox(L, p.x, p.y)) target = L;
+  const L = sel.length === 1 ? sel[0] : null;
+  if (L && !mod) {
+    const kind = hitHandle(p, gizmoHandles(L));
+    const [cx, cy] = docToScreen(L.x, L.y);
+    if (kind === 'rot') { dragging = { kind: 'rot', L, a0: Math.atan2(p.sy - cy, p.sx - cx), r0: L.rot }; return; }
+    if (kind === 'scale') { dragging = { kind: 'scale', L, d0: Math.hypot(p.sx - cx, p.sy - cy) || 1, s0: L.scale }; return; }
+  }
+  let target = hitTest(p.x, p.y);
+  if (!target && !mod) target = sel.find(S => pointInLayerBox(S, p.x, p.y)) || null;
   if (target) {
-    if (target.id !== state.selected) select(target.id);
-    dragging = { kind: 'move', L: target, x0: p.x, y0: p.y, lx: target.x, ly: target.y };
+    if (mod) { select(target.id, 'toggle'); return; }
+    if (!sel.includes(target)) select(target.id);
+    else if (state.selected !== target.id) { state.selected = target.id; buildLayerList(); buildProps(); }
+    dragging = { kind: 'move', items: snapItems(selectedLayers()), x0: p.x, y0: p.y };
     return;
   }
   const r = state.ref, a = r.asset && assets.get(r.asset);
-  if (a && !r.locked && r.visible && Math.abs(p.x - r.x) <= a.w * r.scale / 2 && Math.abs(p.y - r.y) <= a.h * r.scale / 2) {
+  if (!mod && a && !r.locked && r.visible && Math.abs(p.x - r.x) <= a.w * r.scale / 2 && Math.abs(p.y - r.y) <= a.h * r.scale / 2) {
     if (state.selected !== '__ref') select('__ref');
     dragging = { kind: 'ref', x0: p.x, y0: p.y, lx: r.x, ly: r.y };
     return;
   }
-  if (state.selected) select(null);
-  dragging = { kind: 'pan', sx: p.sx, sy: p.sy, ox: view.ox, oy: view.oy };
+  // Empty canvas: rubber band selection (Shift / Ctrl adds to the current selection).
+  dragging = { kind: 'box', x0: p.x, y0: p.y, x1: p.x, y1: p.y, sx: p.sx, sy: p.sy, add: mod };
 });
 viewportEl.addEventListener('pointermove', (e) => {
   const p = evtDoc(e);
   if (!dragging) {
-    const L = selectedLayer(); let cur = spaceDown ? 'grab' : 'default';
-    if (L) {
-      const g = gizmoHandles(L), R = 8 * dpr;
-      if (Math.hypot(p.sx - g.rot[0], p.sy - g.rot[1]) < R) cur = 'alias';
-      else if (g.corners.some(c => Math.hypot(p.sx - c[0], p.sy - c[1]) < R)) cur = 'nwse-resize';
-      else if (hitTest(p.x, p.y) || pointInLayerBox(L, p.x, p.y)) cur = 'move';
-    } else if (hitTest(p.x, p.y)) cur = 'pointer';
+    const sel = selectedLayers(); let cur = 'default';
+    const mod = e.shiftKey || e.ctrlKey || e.metaKey;
+    const kind = !mod && sel.length ? hitHandle(p, sel.length > 1 ? groupHandles(sel) : gizmoHandles(sel[0])) : null;
+    if (kind === 'rot') cur = 'alias';
+    else if (kind === 'scale') cur = 'nwse-resize';
+    else if (hitTest(p.x, p.y)) cur = mod ? 'copy' : (sel.length ? 'move' : 'pointer');
+    else if (!mod && sel.some(S => pointInLayerBox(S, p.x, p.y))) cur = 'move';
+    if (spaceDown) cur = 'grab';
     viewportEl.style.cursor = cur;
     return;
   }
   const D = dragging;
   if (D.kind === 'pan') { view.ox = D.ox + (p.sx - D.sx); view.oy = D.oy + (p.sy - D.sy); requestRender(); return; }
-  if (D.kind === 'move') { D.L.x = Math.round((D.lx + p.x - D.x0) * 100) / 100; D.L.y = Math.round((D.ly + p.y - D.y0) * 100) / 100; }
+  if (D.kind === 'box') { D.x1 = p.x; D.y1 = p.y; D.moved = D.moved || Math.hypot(p.sx - D.sx, p.sy - D.sy) > 3 * dpr; requestRender(); return; }
+  const r2 = v => Math.round(v * 100) / 100;
+  if (D.kind === 'move') {
+    let dx = p.x - D.x0, dy = p.y - D.y0;
+    if (e.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }   // Shift locks the axis
+    for (const it of D.items) { it.L.x = r2(it.x + dx); it.L.y = r2(it.y + dy); }
+  }
   else if (D.kind === 'scale') { const [cx, cy] = docToScreen(D.L.x, D.L.y); D.L.scale = Math.max(0.001, +(D.s0 * Math.hypot(p.sx - cx, p.sy - cy) / D.d0).toFixed(4)); }
   else if (D.kind === 'rot') {
     const [cx, cy] = docToScreen(D.L.x, D.L.y);
@@ -2254,10 +2461,44 @@ viewportEl.addEventListener('pointermove', (e) => {
     r = ((r + 180) % 360 + 360) % 360 - 180;
     if (e.shiftKey) r = Math.round(r / 15) * 15;
     D.L.rot = +r.toFixed(2);
+  } else if (D.kind === 'gscale') {
+    const [cx, cy] = docToScreen(D.cx, D.cy);
+    const f = Math.max(0.001, Math.hypot(p.sx - cx, p.sy - cy) / D.d0);
+    for (const it of D.items) {
+      it.L.x = r2(D.cx + (it.x - D.cx) * f); it.L.y = r2(D.cy + (it.y - D.cy) * f);
+      it.L.scale = Math.max(0.001, +(it.scale * f).toFixed(4));
+    }
+  } else if (D.kind === 'grot') {
+    const [cx, cy] = docToScreen(D.cx, D.cy);
+    let da = (Math.atan2(p.sy - cy, p.sx - cx) - D.a0) * 180 / Math.PI;
+    if (e.shiftKey) da = Math.round(da / 15) * 15;
+    const th = da * Math.PI / 180, c = Math.cos(th), sn = Math.sin(th);
+    for (const it of D.items) {
+      const dx = it.x - D.cx, dy = it.y - D.cy;
+      it.L.x = r2(D.cx + c * dx - sn * dy); it.L.y = r2(D.cy + sn * dx + c * dy);
+      let r = it.rot + da; r = ((r + 180) % 360 + 360) % 360 - 180;
+      it.L.rot = +r.toFixed(2);
+    }
   } else if (D.kind === 'ref') { state.ref.x = D.lx + p.x - D.x0; state.ref.y = D.ly + p.y - D.y0; refRows.forEach(x => x.sync()); requestRender(); return; }
   syncProps(); requestRender(); scheduleVector();
 });
-const endDrag = () => { if (dragging && dragging.kind !== 'pan') { dragging = null; commit(); scheduleVector(); } dragging = null; };
+function finishBox(D) {
+  if (!D.moved) { if (!D.add) select(null); return; }
+  const x0 = Math.min(D.x0, D.x1), x1 = Math.max(D.x0, D.x1), y0 = Math.min(D.y0, D.y1), y1 = Math.max(D.y0, D.y1);
+  const ids = [];
+  for (const L of state.layers) {
+    if (!L.visible) continue;
+    const b = groupBox([L]);
+    if (b.x1 >= x0 && b.x0 <= x1 && b.y1 >= y0 && b.y0 <= y1) ids.push(L.id);
+  }
+  selectMany(ids, D.add);
+}
+const endDrag = () => {
+  const D = dragging; dragging = null;
+  if (!D || D.kind === 'pan') return;
+  if (D.kind === 'box') { finishBox(D); requestRender(); return; }
+  commit(); scheduleVector();
+};
 viewportEl.addEventListener('pointerup', endDrag);
 viewportEl.addEventListener('pointercancel', endDrag);
 viewportEl.addEventListener('wheel', (e) => {
@@ -2281,16 +2522,20 @@ window.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveProject(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); duplicate(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'a') { e.preventDefault(); selectMany(state.layers.filter(l => l.visible).map(l => l.id)); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.key === 'Delete' || e.key === 'Backspace') { if (L) { removeLayer(); e.preventDefault(); } return; }
+  if (e.key === 'Delete' || e.key === 'Backspace') { if (selectedLayers().length) { removeLayer(); e.preventDefault(); } return; }
   if (k === 'f') { fitView(); return; }
   if (k === '1' || k === '2' || k === '3') { state.preview.mode = +k - 1; previewModeRow.sync(); requestRender(); return; }
   if (k === 'v') { state.preview.vector = !state.preview.vector; buildPreviewPanel(); scheduleVector(); return; }
   if (k === 'escape') { select(null); return; }
-  if (L && e.key.startsWith('Arrow')) {
+  const sel = selectedLayers();
+  if (sel.length && e.key.startsWith('Arrow')) {
     const st = e.shiftKey ? 10 : 1;
-    if (e.key === 'ArrowLeft') L.x -= st; if (e.key === 'ArrowRight') L.x += st;
-    if (e.key === 'ArrowUp') L.y -= st; if (e.key === 'ArrowDown') L.y += st;
+    for (const S of sel) {
+      if (e.key === 'ArrowLeft') S.x -= st; if (e.key === 'ArrowRight') S.x += st;
+      if (e.key === 'ArrowUp') S.y -= st; if (e.key === 'ArrowDown') S.y += st;
+    }
     e.preventDefault(); syncProps(); requestRender(); scheduleVector(); clearTimeout(nudgeTimer); nudgeTimer = setTimeout(commit, 300);
   }
 });
@@ -2305,14 +2550,28 @@ function moveLayer(dir) {
   layersChanged(); commit();
 }
 function duplicate() {
-  const L = selectedLayer(); if (!L) return;
-  const c = JSON.parse(JSON.stringify(L)); c.id = uid(); c.name = L.name + ' copy'; c.x += 20; c.y += 20;
-  addLayer(c);
+  const sel = selectedLayers(); if (!sel.length) return;
+  if (sel.length === 1) {
+    const L = sel[0], c = JSON.parse(JSON.stringify(L)); c.id = uid(); c.name = L.name + ' copy'; c.x += 20; c.y += 20;
+    addLayer(c); return;
+  }
+  // Several: the copies go right above the top-most selected layer, keeping their relative order,
+  // and become the new selection.
+  const top = Math.max(...sel.map(L => state.layers.indexOf(L)));
+  const copies = sel.map(L => { const c = JSON.parse(JSON.stringify(L)); c.id = uid(); c.name = L.name + ' copy'; c.x += 20; c.y += 20; return c; });
+  state.layers.splice(top + 1, 0, ...copies);
+  for (const c of copies) if (isRaster(c)) processImage(c);
+  multiSel.clear(); for (const c of copies) multiSel.add(c.id);
+  state.selected = copies[copies.length - 1].id;
+  layersChanged(); commit();
 }
 function removeLayer() {
-  const i = state.layers.findIndex(l => l.id === state.selected); if (i < 0) return;
-  state.layers.splice(i, 1);
+  const sel = selectedLayers(); if (!sel.length) return;
+  const i = Math.min(...sel.map(L => state.layers.indexOf(L)));
+  state.layers = state.layers.filter(L => !sel.includes(L));
+  multiSel.clear();
   state.selected = state.layers.length ? state.layers[Math.min(i, state.layers.length - 1)].id : null;
+  if (state.selected) multiSel.add(state.selected);
   layersChanged(); commit();
 }
 $('bUp').onclick = () => moveLayer(1);

@@ -26,14 +26,15 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ## Run it
 
 - **Online**: https://kumodot.github.io/VectorMelt/
-- **Local**: download the repo and double click `VectorMelt_v0.6.0.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
+- **Local**: download the repo and double click `VectorMelt_v0.6.1.html` (or `index.html`). No install, no server. Chrome or Edge recommended (WebGL2). Google Fonts need an internet connection; everything else works offline.
 
 ## Workflow
 
 **Layers** (left panel, applied bottom to top)
 - *Image* / *SVG*: drop black and white images (logos, lettering, scans) or SVG files. SVG stays a vector and is rasterized at the layer *Resolution*. Threshold (Otsu or manual), auto invert, *Smooth*, or the *Blur + Level* field.
 - *Text*: type text, pick a font. Filter *All* / *Google* / *Installed*, search, *Other font name* for any Google family or local font, *Find installed fonts* (Chrome / Edge ask permission). *Weight*, *Italic*, *Align*, *Letter spacing*, *Line height*, *Detail*.
-- Shapes: *Circle*, *Ellipse*, *Box*, *Capsule*, *Star* (also polygons), *Ring*.
+- Shapes (icon buttons): *Circle*, *Ellipse*, *Box*, *Capsule*, *Star* (also polygons), *Ring*, *Triangle*, *Cross*, *Arrow*. All exact distance fields; *Corner radius* rounds only the convex corners and keeps the straight edges in place.
+- Multi selection: *Shift* / *Ctrl* click (canvas or layer list) or box select on empty canvas. Move, nudge, scale and rotate (around the group centre), duplicate and delete act on every selected layer.
 - *Ref*: a reference image in the background with *Opacity*, never part of the shape.
 
 **Blending** (per layer)
@@ -59,12 +60,16 @@ VectorMelt melts black and white images, text and simple shapes together like me
 | Key | Action |
 | --- | --- |
 | Wheel | Zoom at cursor |
-| Middle drag / Space + drag / drag on empty area | Pan |
+| Middle drag / right drag / Space + drag | Pan |
+| Shift or Ctrl + click | Add to / remove from selection |
+| Drag on empty area (Shift adds) | Box select |
+| Ctrl+A / Esc | Select all / clear selection |
+| Shift while moving | Lock to one axis |
 | F | Fit document |
 | 1 / 2 / 3 | Fill / Outline / Field preview |
 | V | Vector overlay |
-| Arrows (Shift = 10 px) | Nudge layer |
-| Ctrl+D / Delete | Duplicate / delete layer |
+| Arrows (Shift = 10 px) | Nudge selected layers |
+| Ctrl+D / Delete | Duplicate / delete selected layers |
 | Ctrl+Z / Ctrl+Shift+Z | Undo / redo |
 | Ctrl+S | Save project |
 
@@ -86,7 +91,7 @@ VectorMelt melts black and white images, text and simple shapes together like me
 ```
 index.html                 Pages entry: reads version.json, redirects to the versioned app
 version.json               current version + entry file
-VectorMelt_v0.6.0.html     the app (single file, no build step)
+VectorMelt_v0.6.1.html     the app (single file, no build step)
 assets/logo.svg            logo / favicon
 Samples/                   black and white test images
 screenshots/               README images and banner

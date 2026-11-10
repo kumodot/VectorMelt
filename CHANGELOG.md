@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (2026-11-09)
+- **Multi selection**: *Shift* / *Ctrl* click on the canvas or in the layer list, box select by dragging on empty canvas (*Shift* adds), *Ctrl+A* selects all, *Esc* clears. Move, arrow nudge, scale and rotate act on the whole selection; the group gizmo scales and rotates around the group centre. *Ctrl+D* duplicates and *Delete* removes every selected layer. *Shift* while moving locks the axis.
+- Pan: middle drag, right drag or *Space* + drag (left drag on empty canvas is now box select).
+- **New shapes**: *Triangle*, *Cross* and *Arrow* (shaft width, head width, head length). Exact distance fields; *Corner radius* insets the shape and offsets it back, so only the convex corners round and the straight edges stay put.
+- Shape buttons are icons now. *Box* starts square.
+
 ## 0.6.0 (2026-11-09)
 - **Profile is now exact**: on a *Round* layer, *Profile* above 0 puts a true rolling ball fillet (radius 0.6 x *Blend*) at the junction between that layer and everything below it. Each layer's own field is rendered, the layers are combined on a grid, and the junction is closed (*Union*) or opened (*Subtract* / *Intersect*) with exact distances, only where the ball touches both edges. The letters' own corners stay as they are. The old per pixel arc, which made noise and spikes on text, is gone.
 - **Fillet circles** (Preview): construction circles of the exact fillets, with the ball, its centre and the two tangent points.
