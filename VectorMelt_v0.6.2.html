@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2228.15%2041.17%20454.67%20454.67%22%3E%3Cpath%20fill%3D%22%234fb3ff%22%20d%3D%22M427.13%20132.12C415.79%20132.83%20405.92%20139.41%20399.65%20148.63C396.61%20153.11%20394.87%20158.63%20393.73%20163.88C392.35%20170.24%20392.16%20177.2%20394.43%20183.38C398.6%20194.74%20411.54%20200.89%20422.63%20203.23C426.04%20203.95%20429.65%20204.23%20433.13%20203.87C453.16%20201.78%20467.72%20184.61%20465.82%20164.38C465.43%20160.18%20464.21%20156.04%20462.38%20152.25C460.37%20148.09%20457.52%20144.4%20454.13%20141.28C450.75%20138.18%20446.68%20135.76%20442.38%20134.2C437.45%20132.42%20432.34%20131.79%20427.13%20132.12ZM314.13%20164.12C293.9%20165.38%20275.87%20176.65%20265.06%20193.63C260.16%20201.32%20255.78%20209.33%20251.07%20217.13C248.66%20221.11%20244.93%20225.07%20240.13%20225.75C235.54%20226.4%20230.93%20224.47%20226.84%20222.63C218.35%20218.79%20210.45%20213.61%20202.38%20208.99C186.79%20200.09%20169.52%20195.57%20151.63%20195.01C143.34%20194.75%20134.95%20195.79%20126.88%20197.58C80.32%20207.9%2046.52%20249.34%2045.04%20296.88C44.41%20317.15%2049.93%20336.87%2060.13%20354.3C62.62%20358.56%2065.61%20362.46%2068.63%20366.36C74.22%20373.6%2081.38%20380.15%2088.88%20385.37C103.94%20395.85%20121.27%20402.77%20139.63%20404.49C172.76%20407.6%20203.31%20395.73%20226.38%20372.05C231.52%20366.76%20236.15%20360.66%20239.88%20354.3C244.39%20346.59%20248.18%20338.48%20250.66%20329.88C252.94%20321.98%20254.36%20313.87%20256.22%20305.88C257.5%20300.4%20258.74%20294.7%20261.25%20289.63C262.33%20287.45%20263.79%20284.71%20265.92%20283.38C266.96%20282.72%20267.94%20282.04%20269.13%20281.65C274.09%20279.99%20279.92%20281.26%20284.88%20282.41C292.93%20284.29%20300.98%20285.94%20309.13%20287.37C313.07%20288.06%20317.14%20288.04%20321.13%20287.91C340.55%20287.31%20359.17%20276.25%20369.77%20260.13C377.94%20247.69%20380.74%20233.1%20380.18%20218.38C379.89%20211.01%20379.17%20203.31%20375.79%20196.63C372.19%20189.52%20366.22%20184.49%20360.11%20179.63C347.08%20169.26%20330.88%20163.07%20314.13%20164.12Z%22/%3E%3C/svg%3E">
-<title>VectorMelt v0.6.1</title>
+<title>VectorMelt v0.6.2</title>
 <!--
   VectorMelt (formerly Vector SDF)
   Blend black and white images and primitive shapes as signed distance fields
@@ -12,6 +12,8 @@
   export the result as clean SVG paths.
 
   CHANGELOG
+  0.6.2  Arrow is a line arrow now (shaft + two head strokes, round caps): Length, Thickness,
+         Head size, Head angle. Arrow style toggle keeps the filled Block arrow (and old files).
   0.6.1  Multi selection: Shift / Ctrl click (canvas or list), box select by dragging on empty
          canvas, Ctrl+A. Move, nudge, scale and rotate (around the group centre), duplicate and
          delete act on every selected layer. Shift while moving locks the axis. Right drag pans.
@@ -105,6 +107,8 @@ h3 small{text-transform:none;letter-spacing:0;font-weight:400}
 .shapegrid button{padding:4px 0;display:flex;align-items:center;justify-content:center}
 .shapegrid svg{width:18px;height:18px;fill:#c9ccd3}
 .shapegrid button:hover svg{fill:#fff}
+.shapegrid svg .st{fill:none;stroke:#c9ccd3;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.shapegrid button:hover svg .st{stroke:#fff}
 #layerList{flex:1;overflow-y:auto;border:1px solid var(--line);border-radius:5px;background:#18191d;min-height:80px}
 .lrow{display:flex;align-items:center;gap:6px;padding:5px 6px;border-bottom:1px solid #24262b;cursor:pointer;user-select:none}
 .lrow:hover{background:#22252a}
@@ -180,7 +184,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
         <button data-add="ring" title="Ring" aria-label="Ring"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 3a9 9 0 1 1 0 18a9 9 0 1 1 0-18zm0 4.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9z"/></svg></button>
         <button data-add="triangle" title="Triangle" aria-label="Triangle"><svg viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/></svg></button>
         <button data-add="cross" title="Cross" aria-label="Cross"><svg viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></button>
-        <button data-add="arrow" title="Arrow" aria-label="Arrow"><svg viewBox="0 0 24 24"><path d="M2 9.5h11V5l9 7-9 7v-4.5H2z"/></svg></button>
+        <button data-add="arrow" title="Arrow" aria-label="Arrow"><svg viewBox="0 0 24 24"><path class="st" d="M3.5 12h16.5M14 6l6 6-6 6"/></svg></button>
       </div>
       <div class="addgrid">
         <button data-add="image" title="Black and white image or SVG (or drop files on the canvas)">Image</button>
@@ -252,7 +256,7 @@ kbd{background:#2a2d33;border:1px solid #3a3e45;border-radius:3px;padding:0 4px;
 
 <script>
 'use strict';
-const APP_VERSION = '0.6.1';
+const APP_VERSION = '0.6.2';
 const APP_NAME = 'VectorMelt';
 const LEGACY_APP_NAMES = ['VectorSDF'];
 document.getElementById('ver').textContent = 'v' + APP_VERSION;
@@ -285,7 +289,11 @@ const SHAPE_PARAMS = {
   triangle:[['w', 'Width', 1, 2000, 1], ['h', 'Height', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
   cross:   [['size', 'Size', 1, 2000, 1], ['t', 'Arm thickness', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
   arrow:   [['len', 'Length', 1, 2000, 1], ['sw', 'Shaft width', 1, 1000, 1], ['hw', 'Head width', 1, 2000, 1], ['hl', 'Head length', 1, 2000, 1], ['round', 'Corner radius', 0, 500, 1]],
+  arrowline: [['len', 'Length', 1, 2000, 1], ['t', 'Thickness', 1, 500, 1], ['head', 'Head size', 1, 1000, 1], ['angle', 'Head angle', 10, 85, 1]],
 };
+// Arrow layers have two styles: 'line' (stroked, round caps) and 'block' (filled polygon).
+// Arrows saved before 0.6.2 have no astyle and are block arrows.
+function shapeKind(L) { return L.type === 'arrow' && L.astyle === 'line' ? 'arrowline' : L.type; }
 
 const $ = (id) => document.getElementById(id);
 const statusEl = $('status');
@@ -393,6 +401,14 @@ float sdCross(vec2 p, vec3 q){
   return sign(k)*length(max(w, 0.0)) - rr;
 }
 float sdSeg(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; return length(pa - ba*clamp(dot(pa, ba)/dot(ba, ba), 0.0, 1.0)); }
+// Line arrow pointing +x: a shaft and two head strokes, all with round caps.
+// q = (half length, half thickness, head stroke length, head angle in radians).
+float sdArrowLine(vec2 p, vec4 q){
+  p.y = abs(p.y);
+  vec2 tip = vec2(q.x, 0.0);
+  float d = min(sdSeg(p, vec2(-q.x, 0.0), tip), sdSeg(p, tip, tip + q.z*vec2(-cos(q.w), sin(q.w))));
+  return d - q.y;
+}
 // Arrow pointing +x. q = (half length, shaft half width, head half width, head length), rr = corner radius.
 // The polygon is inset by rr edge by edge, then offset back, so only convex corners get rounded.
 float sdArrow(vec2 p, vec4 q, float rr){
@@ -442,7 +458,7 @@ function shapeExpr(L, i, texIdx) {
     case 'ring': return `sdRing(l, ${q}.x, ${q}.y)`;
     case 'triangle': return `sdTriangle(l, ${q}.xyz)`;
     case 'cross': return `sdCross(l, ${q}.xyz)`;
-    case 'arrow': return `sdArrow(l, ${q}, uP[${i}].w)`;
+    case 'arrow': return L.astyle === 'line' ? `sdArrowLine(l, ${q})` : `sdArrow(l, ${q}, uP[${i}].w)`;
     case 'image': case 'text': return `sampleSDF(uTex${texIdx}, ${q}.xy, l)`;
   }
   return '1e5';
@@ -586,7 +602,7 @@ const vao = gl.createVertexArray();
 
 function ensureProgram() {
   const vis = visibleLayers();
-  const key = vis.map(v => v.L.type + ':' + v.L.op + ':' + v.tex).join('|') + (vis.some(v => needs3pt(v.L)) ? '|3pt' : '');
+  const key = vis.map(v => shapeKind(v.L) + ':' + v.L.op + ':' + v.tex).join('|') + (vis.some(v => needs3pt(v.L)) ? '|3pt' : '');
   progVis = vis;
   if (prog && key === progKey) return;
   const hit = progCache.get(key);
@@ -631,7 +647,7 @@ function layerUniforms(L) {
     case 'ring': Q = [L.r, L.t, 0, 0]; break;
     case 'triangle': Q = [L.w / 2, L.h / 2, L.round, 0]; break;
     case 'cross': Q = [L.size / 2, L.t / 2, L.round, 0]; break;
-    case 'arrow': Q = [L.len / 2, L.sw / 2, L.hw / 2, L.hl]; break;
+    case 'arrow': Q = L.astyle === 'line' ? [L.len / 2, L.t / 2, L.head, L.angle * Math.PI / 180] : [L.len / 2, L.sw / 2, L.hw / 2, L.hl]; break;
     case 'image': case 'text': {
       const c = imgCache.get(L.id);
       if (c) { Q = [c.W, c.H, 0, 0]; scale = Math.max(1e-4, L.scale / c.sc); } else Q = [1, 1, 0, 0];
@@ -1204,7 +1220,7 @@ function makeShape(type) {
     case 'ring': L.r = r; L.t = Math.round(r * 0.35); break;
     case 'triangle': L.w = r * 2; L.h = Math.round(r * 2 * 0.866); L.round = Math.round(r * 0.08); break;
     case 'cross': L.size = r * 2; L.t = Math.round(r * 0.6); L.round = Math.round(r * 0.05); break;
-    case 'arrow': L.len = Math.round(r * 2.6); L.sw = Math.round(r * 0.5); L.hw = Math.round(r * 1.3); L.hl = Math.round(r * 0.9); L.round = Math.round(r * 0.04); break;
+    case 'arrow': L.astyle = 'line'; L.t = Math.round(r * 0.22); L.head = Math.round(r * 0.85); L.angle = 45; L.len = Math.round(r * 2.6); L.sw = Math.round(r * 0.5); L.hw = Math.round(r * 1.3); L.hl = Math.round(r * 0.9); L.round = Math.round(r * 0.04); break;
   }
   return L;
 }
@@ -1357,7 +1373,10 @@ function layerDist(L, X, Y) {
     case 'ring': d = Math.abs(Math.hypot(x, y) - Q[0]) - Q[1] / 2; break;
     case 'triangle': d = sdTriangleJS(x, y, Q[0], Q[1], Q[2]); break;
     case 'cross': d = sdCrossJS(x, y, Q[0], Q[1], Q[2]); break;
-    case 'arrow': d = sdArrowJS(x, y, Q, u.P[3]); break;
+    case 'arrow': if (L.astyle === 'line') {
+      const ay = Math.abs(y), hx = Q[0] - Q[2] * Math.cos(Q[3]), hy = Q[2] * Math.sin(Q[3]);
+      d = Math.min(segDistJS(x, ay, -Q[0], 0, Q[0], 0), segDistJS(x, ay, Q[0], 0, hx, hy)) - Q[1];
+    } else d = sdArrowJS(x, y, Q, u.P[3]); break;
     case 'image': case 'text': {
       const cch = imgCache.get(L.id); if (!cch) return 1e9;
       const W = cch.W, H = cch.H;
@@ -1385,7 +1404,9 @@ function layerHalfExtents(L) {
     case 'ring': return [(L.r + L.t / 2) * s, (L.r + L.t / 2) * s];
     case 'triangle': return [L.w / 2 * s, L.h / 2 * s];
     case 'cross': return [L.size / 2 * s, L.size / 2 * s];
-    case 'arrow': return [L.len / 2 * s, Math.max(L.hw, L.sw) / 2 * s];
+    case 'arrow': return L.astyle === 'line'
+      ? [(L.len + L.t) / 2 * s, (Math.max(0, L.head * Math.sin(L.angle * Math.PI / 180)) + L.t / 2) * s]
+      : [L.len / 2 * s, Math.max(L.hw, L.sw) / 2 * s];
     case 'image': case 'text': { const a = rasterSource(L); return a ? [a.w * s / 2, a.h * s / 2] : [10, 10]; }
   }
   return [10, 10];
@@ -2271,7 +2292,13 @@ function buildProps() {
       add(sliderRow('Level', () => L.level, v => L.level = v, { min: 0.01, max: 0.99, step: 0.01, onInput: () => onLayerEdit(L, true), tip: 'Levels cut point on the blurred image' }));
     }
   } else {
-    for (const [key, label, mn, mx, st] of SHAPE_PARAMS[L.type]) add(sliderRow(label, () => L[key], v => L[key] = v, { min: mn, max: mx, step: st, onInput: () => onLayerEdit(L) }));
+    if (L.type === 'arrow') box.append(segRow('Arrow style', [['line', 'Line'], ['block', 'Block']], () => L.astyle === 'line' ? 'line' : 'block', v => {
+      L.astyle = v;
+      const m = Math.round(Math.min(state.doc.w, state.doc.h) * 0.12);   // fill in params an old arrow never had
+      if (v === 'line') { L.t ??= Math.round(L.sw || m * 0.22); L.head ??= Math.round(L.hl || m * 0.85); L.angle ??= 45; }
+      else { L.sw ??= Math.round(m * 0.5); L.hw ??= Math.round(m * 1.3); L.hl ??= Math.round(m * 0.9); L.round ??= Math.round(m * 0.04); }
+    }, () => { buildProps(); onLayerEdit(L); }));
+    for (const [key, label, mn, mx, st] of SHAPE_PARAMS[shapeKind(L)]) add(sliderRow(label, () => L[key], v => L[key] = v, { min: mn, max: mx, step: st, onInput: () => onLayerEdit(L) }));
   }
   add(sliderRow('X', () => L.x, v => L.x = v, { min: -state.doc.w * 0.5, max: state.doc.w * 1.5, step: 1, onInput: () => onLayerEdit(L) }));
   add(sliderRow('Y', () => L.y, v => L.y = v, { min: -state.doc.h * 0.5, max: state.doc.h * 1.5, step: 1, onInput: () => onLayerEdit(L) }));

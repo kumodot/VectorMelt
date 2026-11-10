@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.2 (2026-11-09)
+- **Line arrow**: *Arrow* is now a stroked arrow (shaft plus two head strokes, round caps) with *Length*, *Thickness*, *Head size* and *Head angle*. *Arrow style* switches to the filled *Block* arrow from 0.6.1; arrows in older project files stay *Block*.
+
 ## 0.6.1 (2026-11-09)
 - **Multi selection**: *Shift* / *Ctrl* click on the canvas or in the layer list, box select by dragging on empty canvas (*Shift* adds), *Ctrl+A* selects all, *Esc* clears. Move, arrow nudge, scale and rotate act on the whole selection; the group gizmo scales and rotates around the group centre. *Ctrl+D* duplicates and *Delete* removes every selected layer. *Shift* while moving locks the axis.
 - Pan: middle drag, right drag or *Space* + drag (left drag on empty canvas is now box select).
